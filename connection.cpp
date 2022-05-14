@@ -82,7 +82,7 @@ namespace http {
                     std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players;
 //                    ожидает
                     while (Server->WaitingLine.at(settings_str).size() < num_players_needed) {
-                        sleep(1);
+//                        sleep(1);
                     }
 //                    записывает игроков
                     for (int i = 0; i < Server->WaitingLine.at(settings_str).size(); ++i) {
@@ -97,10 +97,11 @@ namespace http {
                                     Server->WaitingLine.at(settings_str).begin() + i);
                         }
                     }
+                    int new_game_id;
                     if(Server->Games.size()!=0){
-                        int new_game_id = std::stoi(Server->Games.rbegin()->first) + 1;
+                        new_game_id = std::stoi(Server->Games.rbegin()->first) + 1;
                     } else {
-                        int new_game_id = 0;
+                        new_game_id = 0;
                     }
 
                     int num_teams = std::stoi(request.parameters.at("num_teams"));
