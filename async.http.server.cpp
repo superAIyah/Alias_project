@@ -14,18 +14,19 @@
 std::string HandlerSendMes(const Request &request)
 {
     // use data from request
-    Response sent_mes;
+    Response mes2send;
     if(request.parameters.at("is_word") == "true"){
-        sent_mes.method = "useful";
-        sent_mes.parameters["user_pts"] = USER_GUESS_POINTS;
-        sent_mes.parameters["host_pts"] = HOST_GUESS_POINTS;
+        mes2send.method = "useful";
+        mes2send.parameters["user_pts"] = USER_GUESS_POINTS;
+        mes2send.parameters["host_pts"] = HOST_GUESS_POINTS;
     } else {
-        sent_mes.method = request.method;
+        mes2send.method = "msg";
+        mes2send.parameters["text"] = request.parameters.at("text");
     }
 
-    sent_mes.parameters["user_id"] = request.parameters.at("user_id");
-    sent_mes.parameters["team_id"] = request.parameters.at("team_id");
-    return Response2String(sent_mes);
+    mes2send.parameters["user_login"] = request.parameters.at("user_login");
+    mes2send.parameters["team_id"] = request.parameters.at("team_id");
+    return Response2String(mes2send);
 }
 
 

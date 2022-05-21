@@ -24,9 +24,10 @@ Request parse(std::string req_data) {
         request.parameters["num_teams"] = request_arr[4];
     }
     if (request.method == "msg") {
-        request.parameters["game_id"] = request_arr[1];
-        request.parameters["team_id"] = request_arr[2];
-        request.parameters["msg"] = request_arr[3];
+        request.parameters["user_login"] = request_arr[1];
+        request.parameters["game_id"] = request_arr[2];
+        request.parameters["team_id"] = request_arr[3];
+        request.parameters["text"] = request_arr[4];
     }
 
 
@@ -47,7 +48,7 @@ namespace http {
                                Router<std::string(*)(const Request &request)> &requestRouter)
                 : strand_(boost::asio::make_strand(io_context)),
                   socket_(strand_),
-                  requestRouter_(requestRouter){
+                  requestRouter_(requestRouter) {
         }
 
         boost::asio::ip::tcp::socket &Connection::socket() {
@@ -75,7 +76,7 @@ namespace http {
 
                     Server->WaitingLine[settings_str].players.push_back(
                             std::make_pair(&socket_, request.parameters.at("user_login")));
-                    int line_place = Server->WaitingLine.at(settings_str).players.size()-1;
+                    int line_place = Server->WaitingLine.at(settings_str).players.size() - 1;
                     int num_players_needed = std::stoi(request.parameters.at("num_players")) *
                                              std::stoi(request.parameters.at("num_teams"));
 //                    сокеты и логины игроков
@@ -114,10 +115,10 @@ namespace http {
                     Server->WaitingLine.at(settings_str).creating_game.lock();
                     bool game_exists = false;
 //                    checks if game exists
-                    for(int i=0; i<Server->Games.size(); ++i){
-                        for(int j = 0; j<Server->Games[i].team_sockets.size(); ++j){
-                            for(int k=0; k<Server->Games[i].team_sockets[j+1].size(); ++k) {
-                                if (Server->Games[i].team_sockets[j+1][k] == &socket_) {
+                    for (int i = 0; i < Server->Games.size(); ++i) {
+                        for (int j = 0; j < Server->Games[i].team_sockets.size(); ++j) {
+                            for (int k = 0; k < Server->Games[i].team_sockets[j + 1].size(); ++k) {
+                                if (Server->Games[i].team_sockets[j + 1][k] == &socket_) {
                                     game_exists = true;
                                     new_game_id = i;
                                     break;
@@ -125,7 +126,7 @@ namespace http {
                             }
                         }
                     }
-                    if(!game_exists) {
+                    if (!game_exists) {
                         if (Server->Games.size() != 0) {
                             new_game_id = Server->Games.rbegin()->first + 1;
                         } else {
@@ -140,10 +141,10 @@ namespace http {
 //                    добавляет слова
                         for (int i = 0; i < num_teams; ++i) {
                             Server->Games[new_game_id].team_words[i] = Server->WDBM->get_words_str(
-                                    std::stoi(request.parameters.at("level")), WORD_PACK_SIZE);
-                            Server->Games[
-                                    new_game_id].cur_words[i] = Server->Games[
-                                    new_game_id].team_words[i][0];
+                                            std::stoi(request.parameters.at("level")),
+                                            WORD_PACK_SIZE);
+                            Server->Games[new_game_id].cur_words[i] =
+                                    Server->Games[new_game_id].team_words[i][0];
                         }
                     }
                     Server->WaitingLine.at(settings_str).creating_game.unlock();
@@ -156,7 +157,8 @@ namespace http {
                     }
                     std::string buffer = ss.str();
 
-                    boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+                    boost::asio::async_write(socket_,
+                                             boost::asio::buffer(buffer.data(), buffer.size()),
                                              boost::bind(&Connection::handle_write, shared_from_this(),
                                                          boost::asio::placeholders::error));
 
@@ -166,7 +168,8 @@ namespace http {
 //                    std::string msgstr = SerializeMsg(request);
                     bool is_word = false;
                     std::vector<std::string> words_in_msg;
-                    boost::split(words_in_msg, request.parameters.at("msg"), [](char c) { return c == ' '; });
+                    boost::split(words_in_msg, request.parameters.at("text"),
+                                 [](char c) { return c == ' '; });
                     for (int i = 0; i < words_in_msg.size(); ++i) {
                         if (words_in_msg[i] ==
                             Server->Games.at(game_id).cur_words[team_id]) { is_word = true; }
@@ -174,16 +177,49 @@ namespace http {
 
                     request.parameters["is_word"] = (is_word ? "true" : "false");
 
-                    std::string buffer = requestRouter_.processRoute(request.method, request);
+//                    std::string buffer = requestRouter_.processRoute(request.method, request);
+                    Response mes2send;
+                    if(request.parameters.at("is_word") == "true"){
+                        mes2send.method = "guess";
+                        mes2send.parameters["user_pts"] = 2;
+                        mes2send.parameters["host_pts"] = 1;
+                    } else {
+                        mes2send.method = "msg";
+                    }
 
-                    std::vector<boost::asio::ip::tcp::socket *> sockets = Server->Games.at(
-                            game_id).team_sockets[team_id];
+                    mes2send.parameters["text"] = request.parameters.at("text");
+                    mes2send.parameters["user_login"] = request.parameters.at("user_login");
+                    mes2send.parameters["team_id"] = request.parameters.at("team_id");
+
+                    std::vector<boost::asio::ip::tcp::socket *> sockets;
+                    std::string buffer;
+                    if(mes2send.method == "guess"){
+                        for(int i=1; i<=Server->Games.at(game_id).team_sockets.size(); ++i) {
+                            for(int j=0; j<Server->Games.at(game_id).team_sockets[i].size(); ++j) {
+                                sockets.push_back(Server->Games.at(game_id).team_sockets[i][j]);
+                            }
+                        }
+                        std::stringstream ss;
+                        ss << "guess:";
+                        ss << mes2send.parameters["user_login"] << ":" << mes2send.parameters["text"]
+                        << mes2send.parameters["user_pts"] <<":"<<mes2send.parameters["host_pts"];
+                        buffer = ss.str();
+                    } else {
+                        sockets = Server->Games.at(game_id).team_sockets[std::stoi(mes2send.parameters["team_id"])];
+                        std::stringstream ss;
+                        ss << "msg:";
+                        ss << mes2send.parameters["user_login"] << ":" << mes2send.parameters["text"];
+                        buffer = ss.str();
+                    }
+
                     for (auto sock: sockets) {
-                        boost::asio::async_write(*sock, boost::asio::buffer(buffer.data(), buffer.size()),
+                        boost::asio::async_write(*sock,
+                                                 boost::asio::buffer(buffer.data(), buffer.size()),
                                                  boost::bind(&Connection::handle_multiwrite,
                                                              shared_from_this(),
                                                              boost::asio::placeholders::error));
                     }
+                    handle_write(e);
                 }
 //                ----------------
 
@@ -208,7 +244,6 @@ namespace http {
                                                     boost::asio::placeholders::bytes_transferred));
             }
         }
-
 
 
     } // namespace server3
