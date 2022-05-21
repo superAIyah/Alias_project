@@ -21,8 +21,6 @@ std::string HandlerSendMes(const Request &request)
         sent_mes.parameters["host_pts"] = HOST_GUESS_POINTS;
     } else {
         sent_mes.method = request.method;
-        sent_mes.parameters["user_pts"] = "0";
-        sent_mes.parameters["host_pts"] = "0";
     }
 
     sent_mes.parameters["user_id"] = request.parameters.at("user_id");
@@ -41,11 +39,11 @@ namespace http {
                   acceptor_(io_context_),
                   new_connection_()
         {
-            std::vector<std::unique_ptr<DBConnection>> connections;
-            connections.push_back(std::make_unique<DBConnection>(HOST, USERNAME1, PWD1, SCHEMA_NAME));
-            connections.push_back(std::make_unique<DBConnection>(HOST, USERNAME2, PWD2, SCHEMA_NAME));
+            std::vector<std::unique_ptr<DBConnection>> DBconnections;
+            DBconnections.push_back(std::make_unique<DBConnection>(HOST, USERNAME1, PWD1, SCHEMA_NAME));
+            DBconnections.push_back(std::make_unique<DBConnection>(HOST, USERNAME2, PWD2, SCHEMA_NAME));
             std::unique_ptr<IConnectionPool> ConnPool = std::make_unique<ConnectionPool>();
-            ConnPool->FillPool(std::move(connections));
+            ConnPool->FillPool(std::move(DBconnections));
             ConnectionProxy ConnProxy = ConnPool->get_connection();
 
             UDBM = new UserDBManager(*ConnProxy);

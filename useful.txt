@@ -1,0 +1,9 @@
+telnet localhost 5000
+
+settings:ivan:1:4:1
+
+settings:vlad:1:4:1
+
+settings:fedya:1:4:1
+
+settings:mansur:1:4:1

@@ -31,9 +31,15 @@ const std::string USERNAME2 = "server_2";
 const std::string PWD2 = "2222";
 
 struct Table{
+    std::string settings;
     std::map<int, std::vector<boost::asio::ip::tcp::socket*>> team_sockets;
     std::map<int, std::vector<std::string>> team_words;
     std::map<int, std::string> cur_words;
+};
+
+struct Lobby{
+    std::vector<std::pair<boost::asio::ip::tcp::socket*, std::string>> players;
+    std::mutex creating_game;
 };
 
 namespace http {
@@ -48,9 +54,9 @@ namespace http {
             /// Run the server's io_context loop.
             void run();
 
-            std::map<std::string, std::vector<std::pair<boost::asio::ip::tcp::socket*, std::string>>> WaitingLine;
+            std::map<std::string, Lobby> WaitingLine;
 
-            std::map<std::string, Table> Games;
+            std::map<int, Table> Games;
 
             IUserDBManager* UDBM;
             IWordDBManager* WDBM;

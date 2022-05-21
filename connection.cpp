@@ -73,37 +73,18 @@ namespace http {
                     std::string settings_str = SerializeSettings(request);
 //                    добавляет в линию ожидания
 
-                    Server->WaitingLine[settings_str].push_back(
+                    Server->WaitingLine[settings_str].players.push_back(
                             std::make_pair(&socket_, request.parameters.at("user_login")));
-                    int line_place = Server->WaitingLine.at(settings_str).size()-1;
+                    int line_place = Server->WaitingLine.at(settings_str).players.size()-1;
                     int num_players_needed = std::stoi(request.parameters.at("num_players")) *
                                              std::stoi(request.parameters.at("num_teams"));
 //                    сокеты и логины игроков
                     std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players;
 //                    ожидает
-                    while (Server->WaitingLine.at(settings_str).size() < num_players_needed) {
+                    while (Server->WaitingLine.at(settings_str).players.size() < num_players_needed) {
 //                        sleep(1);
                     }
-//                    записывает игроков
-                    for (int i = 0; i < Server->WaitingLine.at(settings_str).size(); ++i) {
-                        if (Server->WaitingLine.at(settings_str)[i].first == &socket_) {
-                            players.push_back(Server->WaitingLine.at(settings_str)[i]);
-                        }
-                    }
-//                    убирает игроков из линии ожидания
-                    for (int i = 0; i < num_players_needed; ++i) {
-                        if (Server->WaitingLine.at(settings_str)[i].first == &socket_) {
-                            Server->WaitingLine.at(settings_str).erase(
-                                    Server->WaitingLine.at(settings_str).begin() + i);
-                        }
-                    }
-                    int new_game_id;
-                    if(Server->Games.size()!=0){
-                        new_game_id = std::stoi(Server->Games.rbegin()->first) + 1;
-                    } else {
-                        new_game_id = 0;
-                    }
-
+//                   team_id found
                     int num_teams = std::stoi(request.parameters.at("num_teams"));
                     int team_id;
                     if (num_teams == 0) {
@@ -111,25 +92,67 @@ namespace http {
                     } else {
                         team_id = line_place % num_teams + 1;
                     }
-//                    добавляет игроков в новую игру
+
+//                    записывает игроков
                     for (int i = 0; i < num_players_needed; ++i) {
-                        Server->Games[std::to_string(new_game_id)].team_sockets[i % num_teams + 1].push_back(
-                                players[i].first);
+//                        if (Server->WaitingLine.at(settings_str)[i].first == &socket_) {
+                        players.push_back(Server->WaitingLine.at(settings_str).players[i]);
+//                        }
                     }
+                    Server->WaitingLine.at(settings_str).creating_game.lock();
+//                    убирает игроков из линии ожидания
+                    for (int i = 0; i < num_players_needed; ++i) {
+                        if (Server->WaitingLine.at(settings_str).players[i].first == &socket_) {
+                            Server->WaitingLine.at(settings_str).players.erase(
+                                    Server->WaitingLine.at(settings_str).players.begin() + i);
+                            break;
+                        }
+                    }
+                    Server->WaitingLine.at(settings_str).creating_game.unlock();
+
+                    int new_game_id;
+                    Server->WaitingLine.at(settings_str).creating_game.lock();
+                    bool game_exists = false;
+//                    checks if game exists
+                    for(int i=0; i<Server->Games.size(); ++i){
+                        for(int j = 0; j<Server->Games[i].team_sockets.size(); ++j){
+                            for(int k=0; k<Server->Games[i].team_sockets[j+1].size(); ++k) {
+                                if (Server->Games[i].team_sockets[j+1][k] == &socket_) {
+                                    game_exists = true;
+                                    new_game_id = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if(!game_exists) {
+                        if (Server->Games.size() != 0) {
+                            new_game_id = Server->Games.rbegin()->first + 1;
+                        } else {
+                            new_game_id = 0;
+                        }
+
+//                    добавляет игроков в новую игру
+                        for (int i = 0; i < num_players_needed; ++i) {
+                            Server->Games[new_game_id].team_sockets[i % num_teams + 1].push_back(
+                                    players[i].first);
+                        }
 //                    добавляет слова
-                    for (int i = 0; i < num_teams; ++i) {
-                        Server->Games[std::to_string(new_game_id)].team_words[i] = Server->WDBM->get_words_str(
-                                std::stoi(request.parameters.at("level")), WORD_PACK_SIZE);
-                        Server->Games[std::to_string(
-                                new_game_id)].cur_words[i] = Server->Games[std::to_string(
-                                new_game_id)].team_words[i][0];
+                        for (int i = 0; i < num_teams; ++i) {
+                            Server->Games[new_game_id].team_words[i] = Server->WDBM->get_words_str(
+                                    std::stoi(request.parameters.at("level")), WORD_PACK_SIZE);
+                            Server->Games[
+                                    new_game_id].cur_words[i] = Server->Games[
+                                    new_game_id].team_words[i][0];
+                        }
                     }
+                    Server->WaitingLine.at(settings_str).creating_game.unlock();
 
                     std::stringstream ss;
-                    ss << "settings\r";
-                    ss << new_game_id << "\r" << team_id << "\r";
+                    ss << "settings:";
+                    ss << new_game_id << ":" << team_id << ":";
                     for (int i = 0; i < num_players_needed; ++i) {
-                        ss << players[i].second << "\r";
+                        ss << players[i].second << ":";
                     }
                     std::string buffer = ss.str();
 
@@ -138,7 +161,7 @@ namespace http {
                                                          boost::asio::placeholders::error));
 
                 } else if (request.method == "msg") {
-                    std::string game_id = request.parameters.at("game_id");
+                    int game_id = std::stoi(request.parameters.at("game_id"));
                     int team_id = std::stoi(request.parameters.at("team_id"));
 //                    std::string msgstr = SerializeMsg(request);
                     bool is_word = false;
@@ -154,8 +177,7 @@ namespace http {
                     std::string buffer = requestRouter_.processRoute(request.method, request);
 
                     std::vector<boost::asio::ip::tcp::socket *> sockets = Server->Games.at(
-                            request.parameters.at("game_id")).team_sockets[std::stoi(
-                            request.parameters.at("team_id"))];
+                            game_id).team_sockets[team_id];
                     for (auto sock: sockets) {
                         boost::asio::async_write(*sock, boost::asio::buffer(buffer.data(), buffer.size()),
                                                  boost::bind(&Connection::handle_multiwrite,
