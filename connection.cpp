@@ -40,168 +40,158 @@ std::string SerializeSettings(Request request_) {
     return ss.str();
 }
 
-namespace http {
-    namespace server3 {
+namespace http
+{
+    namespace server3
+    {
 
         Connection::Connection(boost::asio::io_context &io_context,
                                Router<std::string(*)(const Request &request)> &requestRouter)
                 : strand_(boost::asio::make_strand(io_context)),
                   socket_(strand_),
-                  requestRouter_(requestRouter){
-        }
+                  requestRouter_(requestRouter){}
 
-        boost::asio::ip::tcp::socket &Connection::socket() {
-            return socket_;
-        }
+        boost::asio::ip::tcp::socket &Connection::socket() { return socket_; }
 
-        void Connection::start() {
+        void Connection::start()
+        {
             socket_.async_read_some(boost::asio::buffer(buffer_),
                                     boost::bind(&Connection::handle_read, shared_from_this(),
                                                 boost::asio::placeholders::error,
                                                 boost::asio::placeholders::bytes_transferred));
         }
 
-        void Connection::handle_read(const boost::system::error_code &e,
-                                     std::size_t bytes_transferred) {
-            if (!e) {
+        void Connection::handle_read(const boost::system::error_code &e, std::size_t bytes_transferred)
+        {
+            if (!e)
+            {
                 std::cout << buffer_.data() << std::endl;
                 Request request = parse(std::string(buffer_.data()));
 
+                //////////////////////////
+                // struct Request
+                // {
+                //     std::string method;
+                //     std::unordered_map<std::string, std::string> parameters;
+                // };
+
+                for(auto i = request.parameters.begin(); i != request.parameters.end(); i++)
+                {
+                    std::cout << i->first << "\t" << i->second << "\n";
+                }
+
+                /////////////////////////
 //                ---------------
-                if (request.method == "settings") {
-//                    слепляет в строку ключ
+                if (request.method == "settings")
+                {
+//                   слепляет в строку ключ
                     std::string settings_str = SerializeSettings(request);
 //                    добавляет в линию ожидания
 
-                    Server->WaitingLine[settings_str].players.push_back(
-                            std::make_pair(&socket_, request.parameters.at("user_login")));
-                    int line_place = Server->WaitingLine.at(settings_str).players.size()-1;
-                    int num_players_needed = std::stoi(request.parameters.at("num_players")) *
-                                             std::stoi(request.parameters.at("num_teams"));
-//                    сокеты и логины игроков
-                    std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players;
-//                    ожидает
-                    while (Server->WaitingLine.at(settings_str).players.size() < num_players_needed) {
-//                        sleep(1);
-                    }
-//                   team_id found
-                    int num_teams = std::stoi(request.parameters.at("num_teams"));
-                    int team_id;
-                    if (num_teams == 0) {
-                        team_id = 0;
-                    } else {
-                        team_id = line_place % num_teams + 1;
-                    }
+                    //количество игроков нужное для начала игры
+                    int num_players_needed = std::stoi(request.parameters.at("num_players")) * std::stoi(request.parameters.at("num_teams"));
 
-//                    записывает игроков
-                    for (int i = 0; i < num_players_needed; ++i) {
-//                        if (Server->WaitingLine.at(settings_str)[i].first == &socket_) {
-                        players.push_back(Server->WaitingLine.at(settings_str).players[i]);
-//                        }
-                    }
-                    Server->WaitingLine.at(settings_str).creating_game.lock();
-//                    убирает игроков из линии ожидания
-                    for (int i = 0; i < num_players_needed; ++i) {
-                        if (Server->WaitingLine.at(settings_str).players[i].first == &socket_) {
-                            Server->WaitingLine.at(settings_str).players.erase(
-                                    Server->WaitingLine.at(settings_str).players.begin() + i);
-                            break;
-                        }
-                    }
-                    Server->WaitingLine.at(settings_str).creating_game.unlock();
+                    Server->WaitingLine[settings_str].players.push_back( std::make_pair(&socket_, request.parameters.at("user_login")) );
 
-                    int new_game_id;
-                    Server->WaitingLine.at(settings_str).creating_game.lock();
-                    bool game_exists = false;
-//                    checks if game exists
-                    for(int i=0; i<Server->Games.size(); ++i){
-                        for(int j = 0; j<Server->Games[i].team_sockets.size(); ++j){
-                            for(int k=0; k<Server->Games[i].team_sockets[j+1].size(); ++k) {
-                                if (Server->Games[i].team_sockets[j+1][k] == &socket_) {
-                                    game_exists = true;
-                                    new_game_id = i;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if(!game_exists) {
-                        if (Server->Games.size() != 0) {
+
+                    int need_players = std::stoi(request.parameters.at("num_players")) * std::stoi(request.parameters.at("num_teams"));
+                    
+                    if (Server->WaitingLine.at(settings_str).players.size() == need_players)
+                    {
+                        std::vector<std::pair<boost::asio::ip::tcp::socket*, std::string>> room = Server->WaitingLine[settings_str].players;
+
+                        std::cout << "GAME CREATE = ";
+                        for (int i = 0; i < need_players; i++)
+                            std::cout << room[i].second << "\t";
+                        std::cout << "\n\n";
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////ЗАЧЕМ
+                        int new_game_id;
+                        if(Server->Games.size()!=0)
                             new_game_id = Server->Games.rbegin()->first + 1;
-                        } else {
+                        else
                             new_game_id = 0;
-                        }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//                    добавляет игроков в новую игру
-                        for (int i = 0; i < num_players_needed; ++i) {
-                            Server->Games[new_game_id].team_sockets[i % num_teams + 1].push_back(
-                                    players[i].first);
-                        }
-//                    добавляет слова
-                        for (int i = 0; i < num_teams; ++i) {
+
+                        //добавляет игроков в новую игру
+                        int num_teams = std::stoi(request.parameters.at("num_teams"));
+                        int num_players = std::stoi(request.parameters.at("num_players"));
+                        int j = 0;
+                        for (int i = 1; i <= num_teams; i++)
+                        {
+                            int count = num_players;
+                            while (count > 0)
+                            {
+                                Server->Games[new_game_id].team_sockets[i].push_back(room[j]);
+                                count--;
+                                j++;
+                            }
+                            //добавляет слова
                             Server->Games[new_game_id].team_words[i] = Server->WDBM->get_words_str(
-                                    std::stoi(request.parameters.at("level")), WORD_PACK_SIZE);
-                            Server->Games[
-                                    new_game_id].cur_words[i] = Server->Games[
-                                    new_game_id].team_words[i][0];
+                                std::stoi(request.parameters.at("level")), WORD_PACK_SIZE);
+
+                            //текущее слово которое отгадывает команда
+                            Server->Games[new_game_id].cur_words[i] = Server->Games[new_game_id].team_words[i][0];
                         }
-                    }
-                    Server->WaitingLine.at(settings_str).creating_game.unlock();
 
-                    std::stringstream ss;
-                    ss << "settings:";
-                    ss << new_game_id << ":" << team_id << ":";
-                    for (int i = 0; i < num_players_needed; ++i) {
-                        ss << players[i].second << ":";
-                    }
-                    std::string buffer = ss.str();
+                        //НЕ УДАЛЯТЬ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        // std::cout << "NEW GAME///////////////////////////////\n";
+                        // for (int i = 1; i <= num_teams; i++)
+                        // {
+                        //     std::cout << "team_id=" << i << "\n";
+                        //     std::cout << "players:";
+                        //     for (auto k = Server->Games[new_game_id].team_sockets[i].begin(); k != Server->Games[new_game_id].team_sockets[i].end(); k++)
+                        //         std::cout << k->second << "\t";
+                        //     std::cout << "\n";
+                            
+                        //     std::cout << "words:";
+                        //     for (auto k = Server->Games[new_game_id].team_words[i].begin(); k != Server->Games[new_game_id].team_words[i].end(); k++)
+                        //         std::cout << *k;
+                        //     std::cout << "\n\n\n";
+                        // }
 
-                    boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+
+                        for(int i = 0; i != room.size(); i++)
+                        {
+                            std::string buffer = "OKEY LETGO";
+                            boost::asio::async_write(*(room[i].first), boost::asio::buffer(buffer.data(), buffer.size()),
                                              boost::bind(&Connection::handle_write, shared_from_this(),
                                                          boost::asio::placeholders::error));
+                        }
+                        
+                        ////убирает игроков из линии ожидания
+                        for (int i = 0; i < num_players_needed; ++i)
+                        {
+                                Server->WaitingLine.at(settings_str).players.erase(
+                                        Server->WaitingLine.at(settings_str).players.begin() + i);
+                        }
 
-                } else if (request.method == "msg") {
-                    int game_id = std::stoi(request.parameters.at("game_id"));
-                    int team_id = std::stoi(request.parameters.at("team_id"));
-//                    std::string msgstr = SerializeMsg(request);
-                    bool is_word = false;
-                    std::vector<std::string> words_in_msg;
-                    boost::split(words_in_msg, request.parameters.at("msg"), [](char c) { return c == ' '; });
-                    for (int i = 0; i < words_in_msg.size(); ++i) {
-                        if (words_in_msg[i] ==
-                            Server->Games.at(game_id).cur_words[team_id]) { is_word = true; }
                     }
-
-                    request.parameters["is_word"] = (is_word ? "true" : "false");
-
-                    std::string buffer = requestRouter_.processRoute(request.method, request);
-
-                    std::vector<boost::asio::ip::tcp::socket *> sockets = Server->Games.at(
-                            game_id).team_sockets[team_id];
-                    for (auto sock: sockets) {
-                        boost::asio::async_write(*sock, boost::asio::buffer(buffer.data(), buffer.size()),
-                                                 boost::bind(&Connection::handle_multiwrite,
-                                                             shared_from_this(),
-                                                             boost::asio::placeholders::error));
-                    }
+                    else
+                        Connection::handle_write(e);
                 }
-//                ----------------
+                else if (request.method == "msg")
+                {
 
-//                std::string buffer = requestRouter_.processRoute(request.method, request);
 //                boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
 //                                         boost::bind(&Connection::handle_write, shared_from_this(),
 //                                                     boost::asio::placeholders::error));
+                }
             }
         }
 
-        void Connection::handle_multiwrite(const boost::system::error_code &e) {
-            if (!e) {
-                return;
-            }
-        }
+        // void Connection::handle_multiwrite(const boost::system::error_code &e) {
+        //     if (!e) {
+        //         return;
+        //     }
+        // }
 
-        void Connection::handle_write(const boost::system::error_code &e) {
-            if (!e) {
+        void Connection::handle_write(const boost::system::error_code &e)
+        {
+            std::cout << "you";
+            if (!e)
+            {
                 socket_.async_read_some(boost::asio::buffer(buffer_),
                                         boost::bind(&Connection::handle_read, shared_from_this(),
                                                     boost::asio::placeholders::error,
