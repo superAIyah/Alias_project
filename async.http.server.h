@@ -1,6 +1,10 @@
 #ifndef BOOST_ASIO_SERVER_ASYNC_HTTP_SERVER_H
 #define BOOST_ASIO_SERVER_ASYNC_HTTP_SERVER_H
 
+
+#define USER_GUESS_POINTS "2"
+#define HOST_GUESS_POINTS "1"
+
 #include <boost/asio.hpp>
 #include <string>
 #include <vector>
@@ -23,6 +27,7 @@ namespace http {
 #include "DBConnection.h"
 #include "UserDBManager.h"
 #include "WordDBManager.h"
+#include <queue>
 
 const std::string HOST = "localhost";
 const std::string SCHEMA_NAME = "test";
@@ -34,9 +39,9 @@ const std::string PWD2 = "2222";
 struct Table{
     std::string settings;
     std::map<int, std::vector< std::pair<boost::asio::ip::tcp::socket*, std::string>>> team_sockets;
-    std::map<int, std::vector<std::string>> team_words;
+    std::map<int, std::queue<std::string>> team_words;
     std::map<int, std::string> cur_words;
-    std::map<int, boost::asio::ip::tcp::socket*> hosts;
+    std::map<int, std::string> hosts;
     time_t round_end;
     int rounds_remaining;
 };
