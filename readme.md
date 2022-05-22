@@ -1,37 +1,41 @@
-Server API:
+# Server API:
 
 (в config.txt запиши путь к mysql-cpp-connector)
 
 : - разделитель
 
-на сервер:
+## Для поиска игры:
+
+### на сервер:
 
 settings:user_login:level:num_players_in_team:num_teams
 
-от сервера:
+### от сервера:
 
 settings:game_id:team_id:player1:player2:player3: ...
 
-для одиночной игры, все игроки
+(для одиночной игры - все игроки; для командной - игроки в команде)
 
-для командной, игроки в команде
+## Для сообщения
 
-на сервер:
+### на сервер:
 
 msg:user_login:game_id:team_id:text
 
-от сервера:
+### от сервера, всем:
 
 msg:user_login:text
 
-или
+#### или
 
-guess:user_login:text:user_pts:host_pts
+guess:user_login:team_id:text:user_pts:host_pts
 
-когда раунд закончился, на сервер:
+## При завершении игры/раунда
 
-round:game_id:team_id
+### когда раунд закончился, на сервер:
 
-когда игра закончилась, на сервер:
+round:game_id
+
+### когда игра закончилась, на сервер:
 
 gameover:game_id 
