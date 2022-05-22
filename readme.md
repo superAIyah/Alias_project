@@ -44,7 +44,7 @@ keyword:new_keyword
 
 round:game_id
 
-### от сервера, новый раунд, всем остальным:
+### от сервера, новый раунд, всем:
 
 round:host_login
 
