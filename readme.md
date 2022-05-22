@@ -24,7 +24,7 @@ keyword:new_keyword
 
 ### на сервер:
 
-msg:user_login:game_id:team_id:text
+msg:user_login:game_id:team_id:text:host_or_not
 
 ### от сервера, всем:
 
