@@ -10,25 +10,33 @@
 
 settings:user_login:level:num_players_in_team:num_teams
 
-### от сервера:
+### от сервера, всем:
 
-settings:game_id:team_id:player1:player2:player3: ...
+settings:game_id:team_id:host_login:player1_login:player2_login:player3_login: ...
 
 (для одиночной игры - все игроки; для командной - игроки в команде)
+
+#### затем ведущему:
+
+keyword:new_keyword
 
 ## Для сообщения
 
 ### на сервер:
 
-msg:user_login:game_id:team_id:text
+msg:user_login:game_id:team_id:text:host_or_not
 
 ### от сервера, всем:
 
 msg:user_login:text
 
-#### или
+### если отгадали, всем:
 
 guess:user_login:team_id:text:user_pts:host_pts
+
+#### затем ведущему:
+
+keyword:new_keyword
 
 ## При завершении игры/раунда
 
@@ -36,6 +44,14 @@ guess:user_login:team_id:text:user_pts:host_pts
 
 round:game_id
 
-### когда игра закончилась, на сервер:
+### от сервера, новый раунд, всем:
 
-gameover:game_id 
+round:host_login
+
+#### затем ведущему:
+
+keyword:new_keyword
+
+### от сервера, конец игры:
+
+game_over
