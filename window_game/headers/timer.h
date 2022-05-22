@@ -7,7 +7,7 @@
 class Timer : public ITimerController
 {
 public:
-    Timer(int start_pos=60, int delta=-1) override;
+    Timer(int start_pos=60, int delta=-1);
     bool on();
     bool off();
     void start() override;
