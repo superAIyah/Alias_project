@@ -196,8 +196,8 @@ namespace http {
                     Response mes2send;
                     if (request.parameters.at("is_word") == "true") {
                         mes2send.method = "guess";
-                        mes2send.parameters["user_pts"] = 2;
-                        mes2send.parameters["host_pts"] = 1;
+                        mes2send.parameters["user_pts"] = '2';
+                        mes2send.parameters["host_pts"] = '1';
                     } else {
                         mes2send.method = "msg";
                     }
@@ -216,7 +216,7 @@ namespace http {
                         }
                         std::stringstream ss;
                         ss << "guess:";
-                        ss << mes2send.parameters["user_login"] << ":" << mes2send.parameters["text"]
+                        ss << mes2send.parameters["user_login"] << ":" << mes2send.parameters["text"]<<":"
                            << mes2send.parameters["user_pts"] << ":" << mes2send.parameters["host_pts"];
                         buffer = ss.str();
                     } else {
@@ -241,6 +241,7 @@ namespace http {
                     }
                     handle_write(e);
                 }
+//                else if (request.method)
 //                ----------------
 
 //                std::string buffer = requestRouter_.processRoute(request.method, request);

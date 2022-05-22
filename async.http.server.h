@@ -6,6 +6,7 @@
 #include <vector>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <ctime>
 
 namespace http {
     namespace server3 {
@@ -35,6 +36,9 @@ struct Table{
     std::map<int, std::vector< std::pair<boost::asio::ip::tcp::socket*, std::string>>> team_sockets;
     std::map<int, std::vector<std::string>> team_words;
     std::map<int, std::string> cur_words;
+    std::map<int, boost::asio::ip::tcp::socket*> hosts;
+    time_t round_end;
+    int rounds_remaining;
 };
 
 struct Lobby{
@@ -89,7 +93,7 @@ namespace http {
             /// The handler for all incoming requests.
             Router<std::string (*)(const Request &request)> request_router;
 
-
+            std::map<int, time_t> round_time;
         };
 
     } // namespace server3
