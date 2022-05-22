@@ -6,7 +6,7 @@ project(boost.asio.server)
 find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(FULL_PATH_TO_MYSQL_CONNECTOR_CPP_DIR /home/vlad/alias/mysql-connector-c++-8.0.29-linux-glibc2.12-x86-64bit)
+file(READ config.txt FULL_PATH_TO_MYSQL_CONNECTOR_CPP_DIR)
 
 #find_package(Boost COMPONENTS locale REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})

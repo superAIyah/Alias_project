@@ -69,7 +69,6 @@ namespace http {
             /// The response to be sent back to the client.
             Response response_;
 
-
             http::server3::server* Server;
         };
     } // namespace server3
