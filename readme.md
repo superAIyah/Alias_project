@@ -10,17 +10,15 @@
 
 settings:user_login:level:num_players_in_team:num_teams
 
-### от сервера, ведущему:
-
-settings:game_id:team_id:host_login:key_word:player1_login:player2_login:player3_login: ...
-
-(по host_login клиент определяет, что он ведущий, и считывает key_word)
-
-### от сервера, всем остальным:
+### от сервера, всем:
 
 settings:game_id:team_id:host_login:player1_login:player2_login:player3_login: ...
 
 (для одиночной игры - все игроки; для командной - игроки в команде)
+
+#### затем ведущему:
+
+keyword:new_keyword
 
 ## Для сообщения
 
@@ -32,13 +30,13 @@ msg:user_login:game_id:team_id:text
 
 msg:user_login:text
 
-### если отгадали, ведущему:
-
-guess:user_login:team_id:text:user_pts:host_pts:key_word
-
-### или если отгадали, всем остальным:
+### если отгадали, всем:
 
 guess:user_login:team_id:text:user_pts:host_pts
+
+#### затем ведущему:
+
+keyword:new_keyword
 
 ## При завершении игры/раунда
 
@@ -46,13 +44,13 @@ guess:user_login:team_id:text:user_pts:host_pts
 
 round:game_id
 
-### от сервера, новый раунд, ведущему:
-
-round:host_login:key_word
-
 ### от сервера, новый раунд, всем остальным:
 
 round:host_login
+
+#### затем ведущему:
+
+keyword:new_keyword
 
 ### от сервера, конец игры:
 
