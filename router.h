@@ -27,6 +27,7 @@ namespace http {
 //        response.http_version = "HTTP/1.0";
 //        response.body = "Not Found";
 //        return response;
+                return " ";
             }
 
         private:
