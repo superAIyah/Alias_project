@@ -28,7 +28,7 @@ msg:user_login:text
 
 #### или
 
-guess:user_login:text:user_pts:host_pts
+guess:user_login:team_id:text:user_pts:host_pts
 
 ## При завершении игры/раунда
 
