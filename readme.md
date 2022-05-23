@@ -30,7 +30,7 @@ msg:user_login:game_id:team_id:text:host_or_not
 
 warning:warning_text
 
-### от сервера, всем:
+### от сервера, всем в команде:
 
 msg:user_login:text
 
