@@ -6,12 +6,10 @@ class ITimerController // интерфейс таймера
 {
 public:
     //чистые виртуальные функции
-    virtual void start() = 0; // старт таймера
+    virtual void start(int) = 0; // старт таймера
     virtual void stop() = 0; // стоп таймера
     virtual void iteration() = 0; // итерация таймера на delta
-private:
-    int time;
-    int delta;
+    int time; // текущее время (секунды)
 };
 
 #endif // ITIMER_H

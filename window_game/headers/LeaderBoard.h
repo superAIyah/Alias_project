@@ -6,7 +6,9 @@
 
 class LeaderBoard {
 public:
+    LeaderBoard(std::vector<Leader>);
     std::vector<Leader> leaders;
+    int size;
 };
 
 #endif // LEADERBOARD_H

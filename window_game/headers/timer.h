@@ -2,15 +2,16 @@
 #define TIMER_H
 
 #include <QTimer>
+#include <QLabel>
 #include "iTimerController.h"
 
 class Timer : public ITimerController
 {
 public:
-    Timer(int start_pos=60, int delta=-1);
+    Timer(QLabel*);
     bool on();
     bool off();
-    void start() override;
+    void start(int start_pos = 60) override;
     void stop() override;
     void iteration() override;
 
@@ -18,8 +19,9 @@ public:
     int time;
     int period = 1000; // время через которое нужно посылать сигнал
 private:
+    QLabel *label; // место куда будет отображаться время
     bool turned_on = false;
-    int delta;
+    int delta=-1;
 };
 
 #endif // TIMER_H

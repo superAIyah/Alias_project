@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "timer.h"
+#include "board.h"
 
 namespace Ui {
 class GameWindow;
@@ -16,6 +17,7 @@ public:
     explicit GameWindow(QWidget *parent = nullptr);
     ~GameWindow();
     Timer *timeController;
+    Board *board;
 
 private slots:
     void on_pushButton_clicked();

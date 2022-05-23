@@ -3,7 +3,7 @@
 
 #include "LeaderBoard.h"
 
-class ILeaderBoard {
+class IBoard {
 public:
     virtual unsigned int UpdateLeaderboard(LeaderBoard lb) = 0;
 };

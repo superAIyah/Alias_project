@@ -5,6 +5,7 @@
 
 class Leader {
 public:
+    Leader(std::string, int, bool);
     std::string name;
     int points;
     bool host;

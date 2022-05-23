@@ -6,8 +6,11 @@ GameWindow::GameWindow(QWidget *parent) :
     ui(new Ui::GameWindow)
 {
     ui->setupUi(this);
-    timeController = new Timer();
+    timeController = new Timer(ui->labelTime); // создание таймера
+    board = new Board(ui->tableBoard); // создание таблички
     connect(timeController->timer, SIGNAL(timeout()), this, SLOT(TimerSlot()));
+
+
 }
 
 GameWindow::~GameWindow()
@@ -20,7 +23,12 @@ void GameWindow::TimerSlot()
 
     // ** Имитация таймера **
     timeController->iteration(); // итерация таймера
-    QString prefix = "Время: ";
+    Leader a("petya", 200, true);
+    Leader b("fedya", 100, false);
+    std::vector<Leader> lrs({a, b});
+    LeaderBoard lb(lrs);
+    board->UpdateLeaderboard(lb);
+    /*QString prefix = "Время: ";
     QString output_time = prefix + QString::number(timeController->time);
 
     // ** Имитация мессенджера **
@@ -55,10 +63,10 @@ void GameWindow::TimerSlot()
             }
             table->setItem(i, j, item);
         }
-    }
+    }*/
 }
 
 void GameWindow::on_pushButton_clicked()
 {
-    timeController->start();
+    timeController->start(60);
 }
