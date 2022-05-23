@@ -32,8 +32,8 @@ const std::string PWD1 = "1111";
 const std::string USERNAME2 = "server_2";
 const std::string PWD2 = "2222";
 
-#define USER_GUESS_POINTS "2";
-#define HOST_GUESS_POINTS "1";
+#define USER_GUESS_POINTS "2"
+#define HOST_GUESS_POINTS "1"
 
 struct Table{
     std::string settings;

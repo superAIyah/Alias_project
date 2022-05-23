@@ -121,6 +121,8 @@ namespace http {
 
 int main(int argc, char* argv[])
 {
+    setlocale(LC_ALL, "Russian");
+//    std::locale::global(std::locale(".KOI8-R"));
     try
     {
         // Check command line arguments.
