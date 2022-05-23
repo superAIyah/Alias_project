@@ -158,9 +158,7 @@ namespace http {
                         for (int i = 1; i <= num_teams; ++i) {
                             Server->Games[new_game_id].hosts[i] = Server->Games[new_game_id].team_sockets[i][0];
                         }
-
-
-
+                        
 //                      для всех игроков в комнате
                         for (int i = 0; i != room.size(); i++) {
 //                            команда игрока
@@ -196,32 +194,34 @@ namespace http {
 
 //                        обнуление счетчика для синхронизации раунда
                         Server->Games[new_game_id].clients_responded = 0;
+//                        обновление таймера
+                        Server->Games[new_game_id].round_end = time(nullptr) + ROUND_TIME;
 
                     } else
                         handle_write(e);
 
                 }
                 else if (request.method == "msg") {
-                    //Здесь код со временем
+
+                    int game_id = std::stoi(request.parameters.at("game_id"));
+                    int team_id = std::stoi(request.parameters.at("team_id"));
+                    std::string text = request.parameters.at("text");
+                    std::string login = request.parameters.at("user_login");
+                    std::string word = Server->Games[game_id].team_words[team_id].front();
 
                     //если время раунда еще не закончилось
+                    if(time(nullptr)< Server->Games[game_id].round_end) {
 //                    если сообщение от ведущего
-                    if (request.parameters.at("who") == "host") {
-                        std::cout << "^^^HOST^^^\n";
-
-                        int game_id = std::stoi(request.parameters.at("game_id"));
-                        int team_id = std::stoi(request.parameters.at("team_id"));
-                        std::string text = request.parameters.at("text");
-                        std::string login = request.parameters.at("user_login");
-                        std::string word = Server->Games[game_id].team_words[team_id].front();
+                        if (request.parameters.at("who") == "host") {
+                            std::cout << "^^^HOST^^^\n";
 
 //                        есть ли слово в сообщении
-                        bool is_word = false;
-                        is_word = text.find(word) != std::string::npos;
+                            bool is_word = false;
+                            is_word = text.find(word) != std::string::npos;
 //                        если есть
-                        if (is_word) {
+                            if (is_word) {
 //                            std::cout << "VLADOS AHUEL\n";
-                            std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
+                                std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
 
 /*
                             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,46 +232,39 @@ namespace http {
                             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 
-                            std::string buffer = "warning:No spoilers!!!";
-                            boost::asio::async_write(socket_,
-                                                     boost::asio::buffer(buffer.data(), buffer.size()),
-                                                     boost::bind(&Connection::handle_write,shared_from_this(),
-                                                                 boost::asio::placeholders::error));
-                        }
-//                        если слова нет
-                        else {
-                            //msg:user_login:text
-                            std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
-//                            сообщение-ответ
-                            std::stringstream ss;
-                            ss << "msg:";
-                            ss << login << ":" << text;
-//                            ss << "\n";////////////////////////////////////////////////
-                            std::string buffer = ss.str();
-//                            отправка ответа всем клиентам в команде
-                            for (size_t i = 0; i < players.size(); i++) {
-                                boost::asio::async_write(*(players[i].first),
+                                std::string buffer = "warning:No spoilers!!!";
+                                boost::asio::async_write(socket_,
                                                          boost::asio::buffer(buffer.data(), buffer.size()),
-                                                         boost::bind(&Connection::handle_multiwrite,shared_from_this(),
+                                                         boost::bind(&Connection::handle_write, shared_from_this(),
                                                                      boost::asio::placeholders::error));
                             }
-                            handle_write(e);
+//                        если слова нет
+                            else {
+                                //msg:user_login:text
+                                std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
+//                            сообщение-ответ
+                                std::stringstream ss;
+                                ss << "msg:";
+                                ss << login << ":" << text;
+//                            ss << "\n";////////////////////////////////////////////////
+                                std::string buffer = ss.str();
+//                            отправка ответа всем клиентам в команде
+                                for (size_t i = 0; i < players.size(); i++) {
+                                    boost::asio::async_write(*(players[i].first),
+                                                             boost::asio::buffer(buffer.data(), buffer.size()),
+                                                             boost::bind(&Connection::handle_multiwrite, shared_from_this(),
+                                                                         boost::asio::placeholders::error));
+                                }
+                                handle_write(e);
+                            }
                         }
-                    }
 //                    если игрок - не ведущий
-                    else {
-
-                        int game_id = std::stoi(request.parameters.at("game_id"));
-                        int team_id = std::stoi(request.parameters.at("team_id"));
-                        std::string message = request.parameters.at("text");
-                        std::string login = request.parameters.at("user_login");
-                        std::string word = Server->Games[game_id].team_words[team_id].front();
-
+                        else {
 //                        есть ли слово в сообщении
-                        bool is_word = false;
-                        is_word = message.find(word) != std::string::npos ? true : false;
+                            bool is_word = false;
+                            is_word = text.find(word) != std::string::npos ? true : false;
 //                        если есть
-                        if (is_word == true) {
+                            if (is_word == true) {
 
 //                            если отгадали, всем:
 //                            guess:user_login:team_id:text:user_pts:host_pts
@@ -280,55 +273,57 @@ namespace http {
 //                            keyword:new_keyword
 
 //                          сообщение-ответ
-                            std::stringstream ss;
-                            ss << "guess:";
-                            ss << login << ":" << team_id << ":" << message << ":" << USER_GUESS_POINTS << ":"
-                               << HOST_GUESS_POINTS;
+                                std::stringstream ss;
+                                ss << "guess:";
+                                ss << login << ":" << team_id << ":" << text << ":" << USER_GUESS_POINTS << ":"
+                                   << HOST_GUESS_POINTS;
 //                            ss << "\n";////////////////////////////////////////////////
-                            std::string buffer = ss.str();
+                                std::string buffer = ss.str();
 
-                            std::map<int, std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>>> players = Server->Games[game_id].team_sockets;
+                                std::map<int, std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>>> players = Server->Games[game_id].team_sockets;
 //                            отправка всем игрокам в комнате
-                            for (int i = 1; i <= players.size(); i++) {
-                                for (int j = 0; j < players[i].size(); j++) {
-                                    boost::asio::async_write(*(players[i][j].first),
-                                                             boost::asio::buffer(buffer.data(),
-                                                                                 buffer.size()),
-                                                             boost::bind(&Connection::handle_multiwrite,
-                                                                         shared_from_this(),
-                                                                         boost::asio::placeholders::error));
+                                for (int i = 1; i <= players.size(); i++) {
+                                    for (int j = 0; j < players[i].size(); j++) {
+                                        boost::asio::async_write(*(players[i][j].first),
+                                                                 boost::asio::buffer(buffer.data(),
+                                                                                     buffer.size()),
+                                                                 boost::bind(&Connection::handle_multiwrite,
+                                                                             shared_from_this(),
+                                                                             boost::asio::placeholders::error));
+                                    }
                                 }
-                            }
 
 //                        отправка нового слова ведущему
-                            send_kw_2_host(game_id, team_id);
+                                send_kw_2_host(game_id, team_id);
 
-
-                            handle_write(e);
-
-                        } else {
-                            //msg:user_login:text
-                            std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
+                            } else {
+                                //msg:user_login:text
+                                std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
 //                            сообщение-ответ
-                            std::stringstream ss;
-                            ss << "msg:";
-                            ss << login << ":" << message;
+                                std::stringstream ss;
+                                ss << "msg:";
+                                ss << login << ":" << text;
 //                            ss << "\n";
-                            std::string buffer = ss.str();
+                                std::string buffer = ss.str();
 //                            отправка всем игрокам в команде
-                            for (size_t i = 0; i < players.size(); i++) {
-                                boost::asio::async_write(*(players[i].first),
-                                                         boost::asio::buffer(buffer.data(), buffer.size()),
-                                                         boost::bind(&Connection::handle_multiwrite, shared_from_this(),
-                                                                     boost::asio::placeholders::error));
+                                for (size_t i = 0; i < players.size(); i++) {
+                                    boost::asio::async_write(*(players[i].first),
+                                                             boost::asio::buffer(buffer.data(), buffer.size()),
+                                                             boost::bind(&Connection::handle_multiwrite, shared_from_this(),
+                                                                         boost::asio::placeholders::error));
+                                }
                             }
                             handle_write(e);
                         }
                     }
-                } else if (request.method == "round") {
+//                    если время раунда закончилось
+                    else { handle_write(e);}
+                }
+                else if (request.method == "round") {
                     int game_id = std::stoi(request.parameters["game_id"]);
 //                    заполнения счетчика клиентов, отчитавшихся о завершении раунда
                     Server->Games[game_id].clients_responded += 1;
+
 //                    если данный клиент был последним, кто отчитался, и теперь отчитались все
                     if (Server->Games[game_id].clients_responded == Server->Games[game_id].num_players) {
 //                      обновили ведущих
@@ -369,6 +364,9 @@ namespace http {
                         for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
                             send_kw_2_host(game_id, i);
                         }
+
+//                        обновление таймера
+                        Server->Games[game_id].round_end = time(nullptr) + ROUND_TIME;
 
                     }
                     handle_write(e);

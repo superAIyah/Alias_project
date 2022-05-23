@@ -65,8 +65,6 @@ namespace http {
             /// Buffer for incoming data.
             boost::array<char, 8192> buffer_;
 
-            char buffer2send[8192];
-
             /// The incoming request.
             Request request_;
 

@@ -34,6 +34,7 @@ const std::string PWD2 = "2222";
 
 #define USER_GUESS_POINTS "2"
 #define HOST_GUESS_POINTS "1"
+#define ROUND_TIME 60
 
 struct Table{
     std::string settings;
