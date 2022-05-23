@@ -26,6 +26,10 @@ keyword:new_keyword
 
 msg:user_login:game_id:team_id:text:host_or_not
 
+### если ведущий спойлерит, от сервера, ведущему:
+
+warning:warning_text
+
 ### от сервера, всем:
 
 msg:user_login:text
