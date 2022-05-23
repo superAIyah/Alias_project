@@ -50,6 +50,8 @@ namespace http {
 
             void handle_multiwrite(const boost::system::error_code &e);
 
+            void send_kw_2_host(int game_id_, int team_id_);
+
         private:
             /// Strand to ensure the connection's handlers are not called concurrently.
             boost::asio::strand<boost::asio::io_context::executor_type> strand_;

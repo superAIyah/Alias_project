@@ -7,6 +7,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <ctime>
+#include <queue>
 
 namespace http {
     namespace server3 {
@@ -31,14 +32,19 @@ const std::string PWD1 = "1111";
 const std::string USERNAME2 = "server_2";
 const std::string PWD2 = "2222";
 
+#define USER_GUESS_POINTS "2";
+#define HOST_GUESS_POINTS "1";
+
 struct Table{
     std::string settings;
+    int num_players;
     std::map<int, std::vector< std::pair<boost::asio::ip::tcp::socket*, std::string>>> team_sockets;
-    std::map<int, std::vector<std::string>> team_words;
+    std::map<int, std::queue<std::string>> team_words;
     std::map<int, std::string> cur_words;
-    std::map<int, boost::asio::ip::tcp::socket*> hosts;
+    std::map<int, std::pair<boost::asio::ip::tcp::socket*, std::string>> hosts;
     time_t round_end;
     int rounds_remaining;
+    int clients_responded;
 };
 
 struct Lobby{

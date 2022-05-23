@@ -8,8 +8,7 @@
 
 
 
-#define USER_GUESS_POINTS "2"
-#define HOST_GUESS_POINTS "1"
+
 
 std::string HandlerSendMes(const Request &request)
 {
