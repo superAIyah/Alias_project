@@ -80,6 +80,10 @@ public:
     int level;
 
     Word(std::string new_word, std::string new_stem, int new_level=0) : word(new_word), stem(new_stem), level(new_level) {}
+	Word() = default;
+	Word& operator=(const Word& other) = default;
+	Word(const Word& other) = default;
+	~Word() = default;
 };
 
 #endif //TASKMANAGER_DB_TABLES_H

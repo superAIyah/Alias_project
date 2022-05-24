@@ -40,8 +40,8 @@ struct Table{
 //    std::string settings;
     int num_players;
     std::map<int, std::vector< std::pair<boost::asio::ip::tcp::socket*, std::string>>> team_sockets;
-    std::map<int, std::queue<std::string>> team_words;
-    std::map<int, std::string> cur_words;
+    std::map<int, std::queue<Word>> team_words;
+    std::map<int, Word> cur_words;
     std::map<int, std::pair<boost::asio::ip::tcp::socket*, std::string>> hosts;
     time_t round_end;
     int rounds_remaining;

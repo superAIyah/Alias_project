@@ -8,7 +8,7 @@
 #include <string>
 #include <sstream>
 
-#define WORD_PACK_SIZE 3
+#define WORD_PACK_SIZE 10
 
 Request parse(std::string req_data) {
 	Request request;
@@ -67,7 +67,7 @@ namespace http {
 			Server->Games[game_id_].team_words[team_id_].pop();
 			std::stringstream ss;
 			ss << "keyword:";
-			ss << Server->Games[game_id_].team_words[team_id_].front();
+			ss << Server->Games[game_id_].team_words[team_id_].front().word;
 			std::string buffer = ss.str();
 
 			boost::asio::async_write(*(Server->Games[game_id_].hosts[team_id_].first),
@@ -102,8 +102,7 @@ namespace http {
 					//количество игроков нужное для начала игры
 					int num_players_needed = num_players * num_teams;
 //                    добавляет в линию ожидания
-					Server->WaitingLine[settings_str].players.push_back(
-							std::make_pair(&socket_, request.parameters.at("user_login")));
+					Server->WaitingLine[settings_str].players.emplace_back(&socket_, request.parameters.at("user_login"));
 
 
 //                    если этот клиент пришел последним, и теперь в комнате достаточно человек
@@ -132,19 +131,22 @@ namespace http {
 						for (int i = 0; i < num_players_needed; i++) {
 							int team_id = i % num_teams + 1;
 							Server->Games[new_game_id].team_sockets[team_id].push_back(room[i]);
+						}
 
+//						добавление слов
+						for (int i = 1; i <= num_teams; ++i) {
 							//добавляет слова
-							std::vector<std::string> new_words = Server->WDBM->get_words_str(std::stoi(request.parameters.at("level")),
-							                                                                 WORD_PACK_SIZE);
+							std::vector<Word> new_words = Server->WDBM->get_words(std::stoi(request.parameters.at("level")),
+							                                                      WORD_PACK_SIZE);
 							for (const auto &elem: new_words)
-								Server->Games[new_game_id].team_words[team_id].push(elem);
+								Server->Games[new_game_id].team_words[i].push(elem);
 
 							//текущее слово которое отгадывает команда
-							Server->Games[new_game_id].cur_words[team_id] = Server->Games[new_game_id].team_words[team_id].front();
+							Server->Games[new_game_id].cur_words[i] = Server->Games[new_game_id].team_words[i].front();
 						}
+
 //                        количество игроков в комнате
 						Server->Games[new_game_id].num_players = num_players_needed;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                        количество раундов равно количеству игроков в команде, чтобы все игроки побывали ведущими
 						Server->Games[new_game_id].rounds_remaining = num_players - 1;
@@ -171,6 +173,7 @@ namespace http {
 							Server->Games[new_game_id].hosts[i] = Server->Games[new_game_id].team_sockets[i][0];
 						}
 
+//						отправка сообщений
 //                      для всех игроков в комнате
 						for (int i = 0; i != room.size(); i++) {
 //                            команда игрока
@@ -200,13 +203,13 @@ namespace http {
 							                                     boost::asio::placeholders::error));
 						}
 
-						//убирает игроков из линии ожидания
+//                      убирает игроков из линии ожидания
 						for (int i = 0; i < num_players_needed; ++i) {
 							Server->WaitingLine.at(settings_str).players.erase(
 									Server->WaitingLine.at(settings_str).players.begin());
 						}
 
-//                        отправка нового слова ведущему
+//                      отправка нового слова ведущему
 						for (int i = 1; i <= Server->Games[new_game_id].team_sockets.size(); ++i) {
 							send_kw_2_host(new_game_id, i);
 						}
@@ -227,7 +230,8 @@ namespace http {
 					int team_id = std::stoi(request.parameters.at("team_id"));
 					std::string text = request.parameters.at("text");
 					std::string login = request.parameters.at("user_login");
-					std::string word = Server->Games[game_id].team_words[team_id].front();
+					std::string word = Server->Games[game_id].team_words[team_id].front().word;
+					std::string stem = Server->Games[game_id].team_words[team_id].front().stem;
 
 					//если время раунда еще не закончилось, отправляем сообщение
 					if (time(nullptr) < Server->Games[game_id].round_end) {
@@ -236,10 +240,10 @@ namespace http {
 							std::cout << "^^^HOST^^^\n";
 
 //                        есть ли слово в сообщении
-							bool is_word = false;
-							is_word = text.find(word) != std::string::npos;
+							bool has_stem = false;
+							has_stem = text.find(stem) != std::string::npos;
 //                        если есть
-							if (is_word) {
+							if (has_stem) {
 //                            std::cout << "VLADOS AHUEL\n";
 								std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
 
@@ -281,10 +285,10 @@ namespace http {
 //                    если игрок - не ведущий
 						else {
 //                        есть ли слово в сообщении
-							bool is_word = false;
-							is_word = text.find(word) != std::string::npos ? true : false;
+							bool has_word = false;
+							has_word = text.find(word) != std::string::npos;
 //                        если есть
-							if (is_word == true) {
+							if (has_word) {
 
 //                            если отгадали, всем:
 //                            guess:user_login:team_id:text:user_pts:host_pts
