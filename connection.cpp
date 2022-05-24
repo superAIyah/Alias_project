@@ -425,6 +425,9 @@ namespace http {
 								                                     boost::asio::placeholders::error));
 							}
 
+//							удаляет комнату
+							Server->Games.erase(game_id);
+
 						}
 					}
 					handle_write(e);
