@@ -28,7 +28,7 @@ Request parse(std::string req_data) {
         request.parameters["game_id"] = request_arr[2];
         request.parameters["team_id"] = request_arr[3];
         request.parameters["text"] = request_arr[4];
-        request.parameters["who"] = request_arr[5];//ведущий или отгдывающий
+        request.parameters["who"] = request_arr[5];//ведущий или отгадывающий
     }
     if (request.method == "round") {
         request.parameters["game_id"] = request_arr[1];
@@ -79,10 +79,16 @@ namespace http {
 
         void Connection::handle_read(const boost::system::error_code &e, std::size_t bytes_transferred) {
             if (!e) {
+//                вывод в консоль
                 std::cout << buffer_.data() << std::endl;
+
+//                парсинг
                 Request request = parse(std::string(buffer_.data()));
+
 //              очистка буфера
                 buffer_.fill('\0');
+
+
                 if (request.method == "settings") {
 //                    слепляет в строку ключ
                     std::string settings_str = SerializeSettings(request);
@@ -138,21 +144,26 @@ namespace http {
 //                        количество игроков в комнате
                         Server->Games[new_game_id].num_players = num_players_needed;
 
-                        //НЕ УДАЛЯТЬ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        // std::cout << "NEW GAME///////////////////////////////\n";
-                        // for (int i = 1; i <= num_teams; i++)
-                        // {
-                        //     std::cout << "team_id=" << i << "\n";
-                        //     std::cout << "players:";
-                        //     for (auto k = Server->Games[new_game_id].team_sockets[i].begin(); k != Server->Games[new_game_id].team_sockets[i].end(); k++)
-                        //         std::cout << k->second << "\t";
-                        //     std::cout << "\n";
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                        количество раундов равно количеству игроков в команде, чтобы все игроки побывали ведущими
+                        Server->Games[new_game_id].rounds_remaining = num_players - 1;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                        //     std::cout << "words:";
-                        //     for (auto k = Server->Games[new_game_id].team_words[i].begin(); k != Server->Games[new_game_id].team_words[i].end(); k++)
-                        //         std::cout << *k;
-                        //     std::cout << "\n\n\n";
-                        // }
+                        /*НЕ УДАЛЯТЬ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                         std::cout << "NEW GAME///////////////////////////////\n";
+                         for (int i = 1; i <= num_teams; i++)
+                         {
+                             std::cout << "team_id=" << i << "\n";
+                             std::cout << "players:";
+                             for (auto k = Server->Games[new_game_id].team_sockets[i].begin(); k != Server->Games[new_game_id].team_sockets[i].end(); k++)
+                                 std::cout << k->second << "\t";
+                             std::cout << "\n";
+
+                             std::cout << "words:";
+                             for (auto k = Server->Games[new_game_id].team_words[i].begin(); k != Server->Games[new_game_id].team_words[i].end(); k++)
+                                 std::cout << *k;
+                             std::cout << "\n\n\n";
+                         }*/
 
 //                      задали ведущих
                         for (int i = 1; i <= num_teams; ++i) {
@@ -326,29 +337,73 @@ namespace http {
 
 //                    если данный клиент был последним, кто отчитался, и теперь отчитались все
                     if (Server->Games[game_id].clients_responded == Server->Games[game_id].num_players) {
+//                        если раунды еще остались, игра не закончена
+                        if(Server->Games[game_id].rounds_remaining != 0) {
+
+                            Server->Games[game_id].rounds_remaining -= 1;
+
 //                      обновили ведущих
-                        for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
-                            for (int j = 0; j < Server->Games[game_id].team_sockets[i].size(); ++j) {
-                                if (Server->Games[game_id].team_sockets[i][j].second ==
-                                    Server->Games[game_id].hosts[i].second) {
-                                    Server->Games[game_id].hosts[i] = Server->Games[game_id].team_sockets[i][j + 1];
-                                    break;
+                            for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
+                                for (int j = 0; j < Server->Games[game_id].team_sockets[i].size(); ++j) {
+                                    if (Server->Games[game_id].team_sockets[i][j].second == Server->Games[game_id].hosts[i].second) {
+                                        if (j == Server->Games[game_id].team_sockets[i].size() - 1) {
+                                            Server->Games[game_id].hosts[i] = Server->Games[game_id].team_sockets[i][0];
+                                        } else {
+                                            Server->Games[game_id].hosts[i] = Server->Games[game_id].team_sockets[i][j + 1];
+                                        }
+                                        break;
+                                    }
+                                }
+
+                            }
+
+//                        для всех команд
+                            for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
+//                        сокеты всех игроков в команде
+                                std::vector<boost::asio::ip::tcp::socket *> sockets2send;
+                                for (int j = 0; j < Server->Games[game_id].team_sockets[i].size(); ++j) {
+                                    sockets2send.push_back(Server->Games[game_id].team_sockets[i][j].first);
+                                }
+
+//                            сообщение-ответ
+                                std::stringstream ss;
+                                ss << "round:";
+                                ss << Server->Games[game_id].hosts[i].second;
+                                std::string buffer = ss.str();
+
+//                          отправка ответа
+                                for (auto sock: sockets2send) {
+                                    boost::asio::async_write(*sock,
+                                                             boost::asio::buffer(buffer.data(), buffer.size()),
+                                                             boost::bind(&Connection::handle_multiwrite, shared_from_this(),
+                                                                         boost::asio::placeholders::error));
                                 }
                             }
 
-                        }
-
-                        for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
-//                        сокеты всех игроков в игре
-                            std::vector<boost::asio::ip::tcp::socket *> sockets2send;
-                            for (int j = 0; j < Server->Games[game_id].team_sockets[i].size(); ++j) {
-                                sockets2send.push_back(Server->Games[game_id].team_sockets[i][j].first);
+//                        отправка нового слова ведущему
+                            for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
+                                send_kw_2_host(game_id, i);
                             }
 
-//                            сообщение-ответ
+//                        обновление таймера
+                            Server->Games[game_id].round_end = time(nullptr) + ROUND_TIME;
+
+//                        обнуление счетчика для синхронизации раунда
+                            Server->Games[game_id].clients_responded = 0;
+                        }
+//                      игра закончена
+                        else {
+//                        сокеты всех игроков в игре
+                            std::vector<boost::asio::ip::tcp::socket *> sockets2send;
+                            for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
+                                for (int j = 0; j < Server->Games[game_id].team_sockets[i].size(); ++j) {
+                                    sockets2send.push_back(Server->Games[game_id].team_sockets[i][j].first);
+                                }
+                            }
+
+//                          сообщение-ответ
                             std::stringstream ss;
-                            ss << "round:";
-                            ss << Server->Games[game_id].hosts[i].second;
+                            ss << "gameover";
                             std::string buffer = ss.str();
 
 //                          отправка ответа
@@ -358,16 +413,8 @@ namespace http {
                                                          boost::bind(&Connection::handle_multiwrite, shared_from_this(),
                                                                      boost::asio::placeholders::error));
                             }
+
                         }
-
-//                        отправка нового слова ведущему
-                        for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
-                            send_kw_2_host(game_id, i);
-                        }
-
-//                        обновление таймера
-                        Server->Games[game_id].round_end = time(nullptr) + ROUND_TIME;
-
                     }
                     handle_write(e);
                 }

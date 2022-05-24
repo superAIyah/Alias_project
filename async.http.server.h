@@ -37,7 +37,7 @@ const std::string PWD2 = "2222";
 #define ROUND_TIME 60
 
 struct Table{
-    std::string settings;
+//    std::string settings;
     int num_players;
     std::map<int, std::vector< std::pair<boost::asio::ip::tcp::socket*, std::string>>> team_sockets;
     std::map<int, std::queue<std::string>> team_words;
