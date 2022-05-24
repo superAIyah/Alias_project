@@ -6,7 +6,10 @@
 
 class Message{
 public:
+    Message(int, std::string, bool, std::string);
     int id;
+    std::string name; // имя пользователя
+    bool me; // флаг, мое ли это сообщение (чтобы виделять отдельным цветом)
     std::string msg;
 };
 

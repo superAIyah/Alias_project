@@ -4,6 +4,8 @@
 #include <QDialog>
 #include "timer.h"
 #include "board.h"
+#include "messenger.h"
+#include "clientinterface.h"
 
 namespace Ui {
 class GameWindow;
@@ -18,6 +20,9 @@ public:
     ~GameWindow();
     Timer *timeController;
     Board *board;
+    Messenger *msg_browser;
+
+    ClientInterface* gui;
 
 private slots:
     void on_pushButton_clicked();
