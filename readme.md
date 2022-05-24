@@ -12,9 +12,9 @@ settings:user_login:level:num_players_in_team:num_teams:round_duration
 
 ### от сервера, всем:
 
-settings:game_id:team_id:host_login:player1_login:player2_login:player3_login: ...
+settings:game_id:team_id:player1_login:player2_login:player3_login: ...
 
-(для одиночной игры - все игроки; для командной - игроки в команде)
+(для одиночной игры - все игроки; для командной - игроки в команде; ведущий - player1_login)
 
 #### затем ведущему:
 
