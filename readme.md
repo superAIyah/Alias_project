@@ -8,7 +8,7 @@
 
 ### на сервер:
 
-settings:user_login:level:num_players_in_team:num_teams
+settings:user_login:level:num_players_in_team:num_teams:round_duration
 
 ### от сервера, всем:
 
