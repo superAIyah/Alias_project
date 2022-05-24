@@ -9,12 +9,9 @@
 #include <ctime>
 #include <queue>
 
-namespace http {
-    namespace server3 {
 
-        class server;
-    }
-}
+class server;
+
 
 #include "connection.h"
 #include "request.h"
@@ -36,74 +33,71 @@ const std::string PWD2 = "2222";
 #define HOST_GUESS_POINTS "1"
 #define ROUND_TIME 60
 
-struct Table{
+struct Table {
 //    std::string settings;
-    int num_players;
-    std::map<int, std::vector< std::pair<boost::asio::ip::tcp::socket*, std::string>>> team_sockets;
-    std::map<int, std::queue<Word>> team_words;
-    std::map<int, Word> cur_words;
-    std::map<int, std::pair<boost::asio::ip::tcp::socket*, std::string>> hosts;
-    time_t round_end;
-    int rounds_remaining;
-    int clients_responded;
+	int num_players;
+	std::map<int, std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>>> team_sockets;
+	std::map<int, std::queue<Word>> team_words;
+	std::map<int, Word> cur_words;
+	std::map<int, std::pair<boost::asio::ip::tcp::socket *, std::string>> hosts;
+	int round_duration;
+	time_t round_end;
+	int rounds_remaining;
+	int clients_responded;
 };
 
-struct Lobby{
-    std::vector<std::pair<boost::asio::ip::tcp::socket*, std::string>> players;
+struct Lobby {
+	std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players;
 };
 
-namespace http {
-    namespace server3 {
 
-        class server
-                : private boost::noncopyable {
-        public:
-            explicit server(const std::string &address, const std::string &port,
-                            std::size_t thread_pool_size);
+class server
+		: private boost::noncopyable {
+public:
+	explicit server(const std::string &address, const std::string &port,
+	                std::size_t thread_pool_size);
 
-            /// Run the server's io_context loop.
-            void run();
+	/// Run the server's io_context loop.
+	void run();
 
-            std::map<std::string, Lobby> WaitingLine;
+	std::map<std::string, Lobby> WaitingLine;
 
-            std::map<int, Table> Games;
+	std::map<int, Table> Games;
 
-            IUserDBManager* UDBM;
-            IWordDBManager* WDBM;
-        private:
-            /// Initiate an asynchronous accept operation.
-            void start_accept();
+	IUserDBManager *UDBM;
+	IWordDBManager *WDBM;
+private:
+	/// Initiate an asynchronous accept operation.
+	void start_accept();
 
-            /// Handle completion of an asynchronous accept operation.
-            void handle_accept(const boost::system::error_code &e);
+	/// Handle completion of an asynchronous accept operation.
+	void handle_accept(const boost::system::error_code &e);
 
-            /// Handle a request to stop the server.
-            void handle_stop();
+	/// Handle a request to stop the server.
+	void handle_stop();
 
-            /// The number of threads that will call io_context::run().
-            std::size_t thread_pool_size_;
+	/// The number of threads that will call io_context::run().
+	std::size_t thread_pool_size_;
 
-        private:
+private:
 
-            /// The io_context used to perform asynchronous operations.
-            boost::asio::io_context io_context_;
+	/// The io_context used to perform asynchronous operations.
+	boost::asio::io_context io_context_;
 
-            /// The signal_set is used to register for process termination notifications.
-            boost::asio::signal_set signals_;
+	/// The signal_set is used to register for process termination notifications.
+	boost::asio::signal_set signals_;
 
-            /// Acceptor used to listen for incoming connections.
-            boost::asio::ip::tcp::acceptor acceptor_;
+	/// Acceptor used to listen for incoming connections.
+	boost::asio::ip::tcp::acceptor acceptor_;
 
-            /// The next connection to be accepted.
-            boost::shared_ptr<Connection> new_connection_;
+	/// The next connection to be accepted.
+	boost::shared_ptr<Connection> new_connection_;
 
-            /// The handler for all incoming requests.
-            Router<std::string (*)(const Request &request)> request_router;
+	/// The handler for all incoming requests.
+	Router<std::string (*)(const Request &request)> request_router;
 
-            std::map<int, time_t> round_time;
-        };
+	std::map<int, time_t> round_time;
+};
 
-    } // namespace server3
-} // namespace http
 
 #endif //BOOST_ASIO_SERVER_ASYNC_HTTP_SERVER_H
