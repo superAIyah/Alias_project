@@ -7,13 +7,27 @@
 
 #include <string>
 #include <sstream>
+#include <regex>
 
 #define WORD_PACK_SIZE 10
 
 Request parse(std::string req_data) {
 	Request request;
 	std::vector<std::string> request_arr;
+
+//	for testing
 	boost::split(request_arr, req_data, [](char c) { return c == ':'; });
+
+//  for deploy
+//	std::regex rx("[^\\s]+\r\n");
+//	std::sregex_iterator re_it(req_data.begin(), req_data.end(), rx), rxend;
+
+//	while(re_it != rxend)
+//	{
+//		request_arr.push_back(re_it->str());
+//		++re_it;
+//	}
+
 
 	request.method = request_arr[0];
 
@@ -41,8 +55,8 @@ Request parse(std::string req_data) {
 
 std::string SerializeSettings(Request request_) {
 	std::stringstream ss;
-	ss << "settings:" << request_.parameters.at("level") << ":" << request_.parameters.at("num_players")
-	   << ":" << request_.parameters.at("num_teams") << ":" << request_.parameters["round_duration"];
+	ss << "settings\r\n" << request_.parameters.at("level") << "\r\n" << request_.parameters.at("num_players")
+	   << "\r\n" << request_.parameters.at("num_teams") << "\r\n" << request_.parameters["round_duration"] << "\r\n";
 	return ss.str();
 }
 
@@ -65,8 +79,9 @@ void Connection::start() {
 void Connection::send_kw_2_host(int game_id_, int team_id_) {
 	Server->Games[game_id_].team_words[team_id_].pop();
 	std::stringstream ss;
-	ss << "keyword:";
+	ss << "keyword\r\n";
 	ss << Server->Games[game_id_].team_words[team_id_].front().word;
+	ss << "\r\n";
 	std::string buffer = ss.str();
 
 	boost::asio::async_write(*(Server->Games[game_id_].hosts[team_id_].first),
@@ -87,8 +102,10 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 //              очистка буфера
 		buffer_.fill('\0');
 
-
+//			Server->router.processRoute("settings", request)
 		if (request.method == "settings") {
+
+
 //                    слепляет в строку ключ
 			std::string settings_str = SerializeSettings(request);
 
@@ -181,15 +198,15 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 
 //                            сообщение-ответ
 					std::stringstream ss;
-					ss << "settings:";
-					ss << new_game_id << ":" << team_id << ":";
+					ss << "settings\r\n";
+					ss << new_game_id << "\r\n" << team_id << "\r\n";
 					if (num_teams == 1) {
 						for (int j = 0; j < num_players_needed; ++j)
-							ss << room[j].second << ":";
+							ss << room[j].second << "\r\n";
 					}
 					else {
 						for (int j = 0; j < num_players; ++j) {
-							ss << Server->Games[new_game_id].team_sockets[team_id][j].second << ":";
+							ss << Server->Games[new_game_id].team_sockets[team_id][j].second << "\r\n";
 						}
 					}
 //                            ss << "\n";//////////////////////////////////////////////////////////////////
@@ -260,7 +277,7 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
                             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 
-						std::string buffer = "warning:No spoilers!!!";
+						std::string buffer = "warning\r\nNo spoilers!!!";
 						boost::asio::async_write(socket_,
 						                         boost::asio::buffer(buffer.data(), buffer.size()),
 						                         boost::bind(&Connection::handle_write, shared_from_this(),
@@ -272,8 +289,8 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 						std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
 //                            сообщение-ответ
 						std::stringstream ss;
-						ss << "msg:";
-						ss << login << ":" << text;
+						ss << "msg\r\n";
+						ss << login << "\r\n" << text << "\r\n";
 //                            ss << "\n";////////////////////////////////////////////////
 						std::string buffer = ss.str();
 //                            отправка ответа всем клиентам в команде
@@ -302,8 +319,8 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 
 //                          сообщение-ответ
 						std::stringstream ss;
-						ss << "guess:";
-						ss << login << ":" << team_id << ":" << text << ":" << USER_GUESS_POINTS << ":"
+						ss << "guess\r\n";
+						ss << login << "\r\n" << team_id << "\r\n" << text << "\r\n" << USER_GUESS_POINTS << "\r\n"
 						   << HOST_GUESS_POINTS;
 //                            ss << "\n";////////////////////////////////////////////////
 						std::string buffer = ss.str();
@@ -330,8 +347,8 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 						std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players = Server->Games[game_id].team_sockets[team_id];
 //                            сообщение-ответ
 						std::stringstream ss;
-						ss << "msg:";
-						ss << login << ":" << text;
+						ss << "msg\r\n";
+						ss << login << "\r\n" << text << "\r\n";
 //                            ss << "\n";
 						std::string buffer = ss.str();
 //                            отправка всем игрокам в команде
@@ -387,8 +404,9 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 
 //                            сообщение-ответ
 						std::stringstream ss;
-						ss << "round:";
+						ss << "round\r\n";
 						ss << Server->Games[game_id].hosts[i].second;
+						ss << "\r\n";
 						std::string buffer = ss.str();
 
 //                          отправка ответа
@@ -427,7 +445,7 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 
 //                          сообщение-ответ
 					std::stringstream ss;
-					ss << "gameover";
+					ss << "gameover\r\n";
 					std::string buffer = ss.str();
 
 //                          отправка ответа
