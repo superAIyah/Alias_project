@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
+#include <unordered_map>
 
 #include "response.h"
 #include "request.h"
@@ -34,7 +35,8 @@ class Client
   }
 
  private:
-  typedef struct {
+  typedef struct
+  {
     std::string login;
     int difficulty;
     int num_of_players;
@@ -42,20 +44,70 @@ class Client
     int round_duration;
   } send_settings_struct;
 
-  typedef struct {
+  typedef struct 
+  {
     int game_id;
     int team_id;
-    std::vector <std::string> team;
+    std::vector <std::string> users_login;
+    std::string host;
   } get_settings_struct;
+
+struct Request
+{
+    std::string method;
+    std::unordered_map<std::string, std::string> parameters;
+}; 
+
+
+void parse_settings(std::string req_data)
+{
+	std::vector<std::string> request_arr;
+	boost::split(request_arr, req_data, [](char c) { return c == ':'; });
+
+	settings.game_id = std::stoi(request_arr[1]);
+	settings.team_id = std::stoi(request_arr[2]);
+  settings.host = request_arr[3];
+  std::vector<std::string> users_login;
+  for (size_t i = 3; i != request_arr.size(); i++)
+    users_login.push_back(request_arr[i]);
+  settings.users_login = users_login;
+}
+
+// 	if (request.method == "msg")
+//   {
+// 		request.parameters["user_login"] = request_arr[1];
+// 		request.parameters["game_id"] = request_arr[2];
+// 		request.parameters["team_id"] = request_arr[3];
+// 		request.parameters["text"] = request_arr[4];
+// 		request.parameters["who"] = request_arr[5];//ведущий или отгадывающий
+// 	}
+// 	if (request.method == "round") {
+// 		request.parameters["game_id"] = request_arr[1];
+// 	}
+
+
+// 	return request;
+// }
+
 
   void Process()
   {
 //    std::string protocol = get_from_gui();
-    if (protocol == "settings") {
+    if (protocol == "settings")
+    {
       // Получил данные от Феди
       // char[10000] send = data – Данные в строке для Влада
+
+//      функция которая считывает ообщение от сервера пусть хранится у тебя в переменной под названием recieve_
+// recieve - settings:game_id:team_id:player1_login:player2_login:player3_login: 
+      parse_settings(std::string(recieve_)); //parse_settings запихнул данные в атрибут settings
+      //
+      // Федя-Мансур
+      //
     }
-    else {
+    else
+    {
+    
     }
   }
   void handle_resolve(const boost::system::error_code& err,
@@ -160,59 +212,7 @@ class Client
     }
   }
 
-  void handle_read_content(const boost::system::error_code& err)
-  {
-    if (!err)
-    {
-      // Continue reading remaining data until EOF.
-      boost::asio::async_read(socket_, response_buf_,
-                              boost::asio::transfer_at_least(1),
-                              boost::bind(&Client::handle_read_content, this,
-                                          boost::asio::placeholders::error));
-    }
-    else if (err == boost::asio::error::eof)
-    {
-      std::istream response_stream(&response_buf_);
-      response_.body = std::string(std::istreambuf_iterator<char>(response_stream), std::istreambuf_iterator<char>());
-      std::cout << response_;
-    }
-    else if (err != boost::asio::error::eof)
-    {
-      std::cout << "Error: " << err << "\n";
-    }
-  }
-
- private:
-  send_settings_struct settings;
-  char sent_[max_length];
-
-  tcp::resolver resolver_;
-  tcp::socket socket_;
-
-  boost::asio::streambuf response_buf_;
-
-  Request request_;
-  Response response_;
-};
-
-int main(int argc, char* argv[])
-{
-  try
-  {
-    if (argc != 4)
-    {
-      std::cout << "Usage: async_client <server> <port> <path>\n";
-      std::cout << "Example:\n";
-      std::cout << "  async_client www.boost.org /LICENSE_1_0.txt\n";
-      return 1;
-    }
-
-    boost::asio::io_context io_context;
-
-    Client c(io_context, argv[1], argv[2], argv[3]);
-    io_context.run();
-  }
-  catch (std::exception& e)
+void handle_read_headers(const boost::system::error_code& err)
   {
     std::cout << "Exception: " << e.what() << "\n";
   }
