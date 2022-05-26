@@ -42,3 +42,8 @@ std::vector<User> UserDBManager::get_all_users(std::vector<int> UserIDs){
     }
     return users;
 }
+
+bool UserDBManager::has_user(std::string login_){
+	mysqlx::Row row = session->sql("SELECT EXISTS (SELECT * FROM users WHERE login = ?);").bind(login_).execute().fetchOne();
+	return row[0].get<int>();
+}

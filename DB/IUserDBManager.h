@@ -20,6 +20,9 @@ public:
 //получение всех пользователей
     virtual std::vector<User> get_all_users(std::vector<int> UserIDs) = 0;
 
+//проверка на существование пользователя
+	virtual bool has_user(std::string login_) = 0;
+
 //сброс таблицы (системное)
     virtual void drop() = 0;
 };

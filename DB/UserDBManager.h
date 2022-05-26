@@ -23,6 +23,8 @@ public:
 
     std::vector<User> get_all_users(std::vector<int> UserIDs) override;
 
+	bool has_user(std::string login_) override;
+
     void drop() override { session->sql("DROP TABLE users;").execute(); }
 };
 

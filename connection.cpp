@@ -21,7 +21,7 @@ Request parse(std::string req_data) {
 //  for deploy
 //	std::regex rx("[^\\s]+\r\n");
 //	std::sregex_iterator re_it(req_data.begin(), req_data.end(), rx), rxend;
-
+//
 //	while(re_it != rxend)
 //	{
 //		request_arr.push_back(re_it->str());
@@ -47,6 +47,9 @@ Request parse(std::string req_data) {
 	}
 	if (request.method == "round") {
 		request.parameters["game_id"] = request_arr[1];
+	}
+	if (request.method == "auth") {
+		request.parameters["user_login"] = request_arr[1];
 	}
 
 
@@ -92,6 +95,9 @@ void Connection::send_kw_2_host(int game_id_, int team_id_) {
 }
 
 void Connection::handle_read(const boost::system::error_code &e, std::size_t bytes_transferred) {
+	boost::asio::io_service ioService;
+//	ioService.run(e);
+
 	if (!e) {
 //                вывод в консоль
 		std::cout << buffer_.data() << std::endl;
@@ -102,9 +108,56 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 //              очистка буфера
 		buffer_.fill('\0');
 
-//			Server->router.processRoute("settings", request)
-		if (request.method == "settings") {
 
+		if (request.method == "auth") {
+			std::string user_login = request.parameters["user_login"];
+//			если пользователь есть в БД
+			if (Server->UDBM->has_user(user_login)) {
+//				если пользователь уже онлайн
+				if (Server->players_online.contains(user_login)) {
+					std::stringstream ss;
+					ss << "auth\r\n";
+					ss << "already_online\r\n";
+					std::string buffer = ss.str();
+					boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+					                         boost::bind(&Connection::handle_write, shared_from_this(),
+					                                     boost::asio::placeholders::error));
+				}
+//				если пользователь не онлайн
+				else {
+//					запоминаем логин
+					user_login_ = user_login;
+//				    добавляем в онлайн
+					Server->players_online[user_login] = {-1, -1};
+
+					std::stringstream ss;
+					ss << "auth\r\n";
+					ss << "ok\r\n";
+					std::string buffer = ss.str();
+					boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+					                         boost::bind(&Connection::handle_write, shared_from_this(),
+					                                     boost::asio::placeholders::error));
+				}
+			}
+//			если пользователя нет в БД
+			else {
+//				запоминаем логин
+				user_login_ = user_login;
+//				добавляем в БД
+				Server->UDBM->add_user(User(user_login));
+//				добавляем в онлайн
+				Server->players_online[user_login] = {-1, -1};
+
+				std::stringstream ss;
+				ss << "auth\r\n";
+				ss << "ok\r\n";
+				std::string buffer = ss.str();
+				boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+				                         boost::bind(&Connection::handle_write, shared_from_this(),
+				                                     boost::asio::placeholders::error));
+			}
+		}
+		else if (request.method == "settings") {
 
 //                    слепляет в строку ключ
 			std::string settings_str = SerializeSettings(request);
@@ -125,8 +178,16 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 			if (Server->WaitingLine.at(settings_str).players.size() == num_players_needed) {
 
 //                        заполняем комнату
-				for (int i = 0; i < num_players_needed; ++i)
-					room.push_back(Server->WaitingLine[settings_str].players[i]);
+				for (int i = 0; i < num_players_needed; ++i) {
+					if (Server->players_online.contains(Server->WaitingLine[settings_str].players[i].second)) {
+						room.push_back(Server->WaitingLine[settings_str].players[i]);
+					}
+					else {
+						Server->WaitingLine[settings_str].players.erase(Server->WaitingLine[settings_str].players.begin() + i);
+						return handle_write(e);
+					}
+				}
+
 
 /*//////////////////////////////////////////////////////////////////////////////////////
 //                        std::cout << "GAME CREATE = ";
@@ -147,7 +208,11 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 				for (int i = 0; i < num_players_needed; i++) {
 					int team_id = i % num_teams + 1;
 					Server->Games[new_game_id].team_sockets[team_id].push_back(room[i]);
+//					запись id игры и команды в players_online
+					Server->players_online[room[i].second] = {new_game_id, team_id};
+
 				}
+
 
 //						добавление слов
 				for (int i = 1; i <= num_teams; ++i) {
@@ -277,7 +342,7 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
                             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 
-						std::string buffer = "warning\r\nNo spoilers!!!";
+						std::string buffer = "warning\r\nNo spoilers!!!\r\n";
 						boost::asio::async_write(socket_,
 						                         boost::asio::buffer(buffer.data(), buffer.size()),
 						                         boost::bind(&Connection::handle_write, shared_from_this(),
@@ -330,10 +395,8 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 						for (int i = 1; i <= players.size(); i++) {
 							for (int j = 0; j < players[i].size(); j++) {
 								boost::asio::async_write(*(players[i][j].first),
-								                         boost::asio::buffer(buffer.data(),
-								                                             buffer.size()),
-								                         boost::bind(&Connection::handle_multiwrite,
-								                                     shared_from_this(),
+								                         boost::asio::buffer(buffer.data(), buffer.size()),
+								                         boost::bind(&Connection::handle_multiwrite, shared_from_this(),
 								                                     boost::asio::placeholders::error));
 							}
 						}
@@ -432,7 +495,6 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 //                        обнуление счетчика для синхронизации раунда
 					Server->Games[game_id].clients_responded = 0;
 				}
-
 //                      игра закончена
 				else {
 //                        сокеты всех игроков в игре
@@ -440,6 +502,8 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 					for (int i = 1; i <= Server->Games[game_id].team_sockets.size(); ++i) {
 						for (int j = 0; j < Server->Games[game_id].team_sockets[i].size(); ++j) {
 							sockets2send.push_back(Server->Games[game_id].team_sockets[i][j].first);
+//							обнуляем game_id & team_id для игрока
+							Server->players_online[Server->Games[game_id].team_sockets[i][j].second] = {-1, -1};
 						}
 					}
 
@@ -470,19 +534,89 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 //                                         boost::bind(&Connection::handle_write, shared_from_this(),
 //                                                     boost::asio::placeholders::error));
 	}
+//	если пользователь вышел из приложения
+	else if (e.message() == "End of file") {
+		std::cout << "Reading  error!\n" << user_login_ << " closed app!\n";
+		if (!user_login_.empty()) {
+			int game_id = Server->players_online[user_login_].first;
+//		если пользователь был в игре
+			if (game_id != -1) {
+				int team_id = Server->players_online[user_login_].second;
+				int num_players_in_team = Server->Games[game_id].team_sockets[team_id].size();
+//			удаляем его из игры
+				for (int i = 0; i < num_players_in_team; ++i) {
+					if (Server->Games[game_id].team_sockets[team_id][i].second == user_login_) {
+						Server->Games[game_id].team_sockets[team_id].erase(Server->Games[game_id].team_sockets[team_id].begin() + i);
+						break;
+					}
+				}
+//			уменьшаем количество игроков в игре
+				Server->Games[game_id].num_players -= 1;
+			}
+			Server->players_online.erase(user_login_);
+		}
+	}
 }
 
 void Connection::handle_multiwrite(const boost::system::error_code &e) {
 	if (!e) {
 		return;
 	}
+	else {
+		std::cout << "Multiple Writing  error!\n" << user_login_ << " closed app!\n";
+
+		if (!user_login_.empty()) {
+			int game_id = Server->players_online[user_login_].first;
+//		если пользователь был в игре
+			if (game_id != -1) {
+				int team_id = Server->players_online[user_login_].second;
+				int num_players_in_team = Server->Games[game_id].team_sockets[team_id].size();
+//			удаляем его из игры
+				for (int i = 0; i < num_players_in_team; ++i) {
+					if (Server->Games[game_id].team_sockets[team_id][i].second == user_login_) {
+						Server->Games[game_id].team_sockets[team_id].erase(Server->Games[game_id].team_sockets[team_id].begin() + i);
+						break;
+					}
+				}
+//			уменьшаем количество игроков в игре
+				Server->Games[game_id].num_players -= 1;
+			}
+			Server->players_online.erase(user_login_);
+		}
+	}
 }
 
 void Connection::handle_write(const boost::system::error_code &e) {
 	if (!e) {
-		socket_.async_read_some(boost::asio::buffer(buffer_),
-		                        boost::bind(&Connection::handle_read, shared_from_this(), boost::asio::placeholders::error,
-		                                    boost::asio::placeholders::bytes_transferred));
+		try {
+			socket_.async_read_some(boost::asio::buffer(buffer_),
+			                        boost::bind(&Connection::handle_read, shared_from_this(), boost::asio::placeholders::error,
+			                                    boost::asio::placeholders::bytes_transferred));
+		} catch (...) {
+			std::cout << "error caught!";
+		}
+	}
+	else {
+		std::cout << "Writing  error!\n" << user_login_ << " closed app!\n";
+
+		if (!user_login_.empty()) {
+			int game_id = Server->players_online[user_login_].first;
+//		если пользователь был в игре
+			if (game_id != -1) {
+				int team_id = Server->players_online[user_login_].second;
+				int num_players_in_team = Server->Games[game_id].team_sockets[team_id].size();
+//			удаляем его из игры
+				for (int i = 0; i < num_players_in_team; ++i) {
+					if (Server->Games[game_id].team_sockets[team_id][i].second == user_login_) {
+						Server->Games[game_id].team_sockets[team_id].erase(Server->Games[game_id].team_sockets[team_id].begin() + i);
+						break;
+					}
+				}
+//			уменьшаем количество игроков в игре
+				Server->Games[game_id].num_players -= 1;
+			}
+			Server->players_online.erase(user_login_);
+		}
 	}
 }
 

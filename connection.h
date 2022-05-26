@@ -53,11 +53,13 @@ private:
 	/// Socket for the connection.
 	boost::asio::ip::tcp::socket socket_;
 
+	std::string user_login_;
+
 	/// The handler used to process the incoming request.
 	Router<std::string(*)(const Request &request)> &requestRouter_;
 
 	/// Buffer for incoming data.
-	boost::array<char, 8192> buffer_;
+	std::array<char, 8192> buffer_;
 
 	/// The incoming request.
 	Request request_;

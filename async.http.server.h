@@ -66,6 +66,9 @@ public:
 
 	IUserDBManager *UDBM;
 	IWordDBManager *WDBM;
+
+//	ключ - логин, значения - game_id & team_id (по -1 если не в игре)
+	std::map<std::string, std::pair<int, int>> players_online;
 private:
 	/// Initiate an asynchronous accept operation.
 	void start_accept();
@@ -96,7 +99,6 @@ private:
 	/// The handler for all incoming requests.
 	Router<std::string (*)(const Request &request)> request_router;
 
-	std::map<int, time_t> round_time;
 };
 
 
