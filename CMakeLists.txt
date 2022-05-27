@@ -27,26 +27,6 @@ message("GAME_LIB_LIBRARIES = ${GAME_LIB_LIBRARIES}")
 
 add_executable(AliasProject
     main.cpp
-    # 1 ОКНО
-    #mainwindow.cpp
-    #mainwindow.h
-    #mainwindow.ui
-    #User.h
-
-    # 2 ОКНО
-    # configwindow.cpp
-    # configwindow.h
-    # configwindow.ui
-
-    # ISetting.h
-    # Setting.h
-    # Setting.cpp
-
-    # gameconfig.h
-    # gameconfig.cpp
-
-    # gamebuilder.h
-    # gamebuilder.cpp
 )
 
 target_link_libraries(AliasProject PRIVATE Qt5::Widgets)

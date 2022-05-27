@@ -29,4 +29,6 @@ void MainWindow::on_pushButton_clicked()
     } else {
         ui->statusbar->showMessage("Ошибка авторизации.");
     }
+    configWindow->show();
+    this->hide();
 }

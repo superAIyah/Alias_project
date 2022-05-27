@@ -21,6 +21,11 @@ GameWindow::~GameWindow()
     delete ui;
 }
 
+ClientInterface *GameWindow::get_client_interface()
+{
+    return gui;
+}
+
 void GameWindow::TimerSlot()
 {
 
@@ -35,7 +40,7 @@ void GameWindow::TimerSlot()
     gui->board->UpdateLeaderboard(lb);
     gui->messenger->UpdateKeyword("Orange");
 
-    Message msg(0, "Martin", 1, "DAADADADA");
+    Message msg("Martin", 1, "DAADADADA");
     std::vector<Message> msgs({msg});
     gui->messenger->ShowMessages(msgs);
 //    // ** Имитация таймера **

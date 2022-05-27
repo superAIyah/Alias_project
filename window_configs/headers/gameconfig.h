@@ -2,14 +2,15 @@
 #define GAMECONFIG_H
 
 #include <iostream>
+#include <string>
 
 class GameConfig {
 public:
-    GameConfig(char sep = '|');
+    GameConfig(std::string sep = "\r\n");
     void AddSetting(std::string);
     std::string GetSettings();
 private:
-    char separator;
+    std::string separator;
     int size;
     std::string settings;
 

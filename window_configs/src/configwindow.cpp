@@ -21,18 +21,20 @@ ConfigWindow::~ConfigWindow()
 
 void ConfigWindow::on_findGameButton_clicked()
 {
+    //ui->BoxMode->setVisible(!ui->BoxMode->isVisible());
+
     //Получаем все RadioButtons у каждого типа настройки
-    QList<QRadioButton *> teamRadios = ui->BoxMode->findChildren<QRadioButton *>();
-    QList<QRadioButton *> levelRadios = ui->BoxLevel->findChildren<QRadioButton *>();
-    QList<QRadioButton *> lengthRadios = ui->BoxLength->findChildren<QRadioButton *>();
+    QList<QRadioButton *> length_radios = ui->BoxLength->findChildren<QRadioButton *>(); // длина раунда
+    QList<QRadioButton *> team_cnt_radios = ui->BoxTeamCnt->findChildren<QRadioButton *>(); // количество команд
+    QList<QRadioButton *> team_sz_radios = ui->BoxTeamSz->findChildren<QRadioButton *>(); // размер команды
 
     // Определяем настройки соотв. классам
-    Setting mode = Setting(teamRadios);
-    Setting level = Setting(levelRadios);
-    Setting round = Setting(lengthRadios);
+    Setting round = Setting(length_radios);
+    Setting team_cnt = Setting(team_cnt_radios);
+    Setting team_sz = Setting(team_sz_radios);
 
     // Список со всеми настройками (Полиморфизм)
-    std::vector<ISetting *> configs = {&mode, &level, &round};
+    std::vector<ISetting *> configs = {&team_sz, &team_cnt, &round};
 
     // Создаем класс, собирающий все настройки воедино
     GameBuilder configs_builder(configs);
@@ -43,6 +45,7 @@ void ConfigWindow::on_findGameButton_clicked()
     // <-- вызов функции поиска игры клиента  -->
 
     // ... Когда игра найдена начинается игра ...
+    // как вызывать?
     gameWindow->show();
     this->hide();
 }

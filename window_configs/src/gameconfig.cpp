@@ -1,6 +1,6 @@
 #include "gameconfig.h"
 
-GameConfig::GameConfig(char sep /*= '|'*/) : separator(sep), size(0)
+GameConfig::GameConfig(std::string sep /*= '|'*/) : separator(sep), size(0)
 { }
 
 void GameConfig::AddSetting(std::string new_setting) {
