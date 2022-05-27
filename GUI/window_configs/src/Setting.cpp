@@ -9,7 +9,7 @@ std::string Setting::collectSetting() {
     std::string s = "";
     for (int i = 0; i < list.size(); i++) {
         if (list[i]->isChecked())
-            s += list[i]->objectName().toStdString();
+            s += list[i]->objectName().toStdString().substr(1);
     }
     return s;
 }

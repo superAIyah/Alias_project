@@ -21,8 +21,8 @@ public:
     Timer *timeController;
     Board *board;
     Messenger *msg_browser;
-
     ClientInterface* gui;
+    ClientInterface* get_client_interface();
 
 private slots:
     void on_pushButton_clicked();

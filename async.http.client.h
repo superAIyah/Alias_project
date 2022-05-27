@@ -1,40 +1,84 @@
-#ifndef ALIAS__ASYNC_HTTP_CLIENT_H_
-#define ALIAS__ASYNC_HTTP_CLIENT_H_
-class Client
-    : private boost::noncopyable {
- public:
-  explicit server(const std::string &address, const std::string &port,
-                  std::size_t thread_pool_size);
+#ifndef ALIAS_ASYNC_HTTP_CLIENT_H
+#define ALIAS_ASYNC_HTTP_CLIENT_H
+#include <iostream>
+#include <istream>
+#include <ostream>
+#include <string>
+#include <boost/asio.hpp>
+#include <boost/bind/bind.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include "gameconfig.h"
+#include "Message.h"
 
-  /// Run the server's io_context loop.
-  void run();
+class Client;
 
- private:
-  /// Initiate an asynchronous accept operation.
-  void start_accept();
+#include "mainwindow.h"
+#include "iclientinterface.h"
+#include <QApplication>
 
-  /// Handle completion of an asynchronous accept operation.
-  void handle_accept(const boost::system::error_code &e);
+#include "response.h"
+#include "request.h"
 
-  /// Handle a request to stop the server.
-  void handle_stop();
+using boost::asio::ip::tcp;
 
- private:
 
-  /// The io_context used to perform asynchronous operations.
-  boost::asio::io_context io_context_;
+class Client {
+public:
+	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_);
 
-  /// The signal_set is used to register for process termination notifications.
-  boost::asio::signal_set signals_;
 
-  /// Acceptor used to listen for incoming connections.
-  boost::asio::ip::tcp::acceptor acceptor_;
+	std::string serialize_auth(std::string user_login);
 
-  /// The next connection to be accepted.
-  boost::shared_ptr<ClientConnection> new_connection_;
+	std::string serialize_settings(GameConfig settings);
 
-  /// The handler for all incoming requests.
-//  Router<std::string (*)(const Request &request)> request_router;
+	std::string serialize_msg(Message msg);
 
+	std::string serialize_round();
+
+	void send_auth(std::string user_login);
+
+	void send_settings(GameConfig settings);
+
+	void send_msg(Message msg);
+
+	void send_round();
+
+	void handle_resolve(const boost::system::error_code &err,
+	                    const tcp::resolver::results_type &endpoints);
+
+	void handle_read(const boost::system::error_code &err);
+
+	void handle_write(const boost::system::error_code &err);
+
+	void handle_multiwrite(const boost::system::error_code &e);
+
+	void run();
+
+private:
+	tcp::resolver resolver_;
+	tcp::socket socket_;
+
+	std::array<char, 8192> response_buf_;
+
+	Request request_;
+	Response response_;
+
+	MainWindow *w;
+
+	std::string user_login_;
+	std::string game_id_;
+	std::string team_id_;
+
+	bool host_;
+
+
+	std::vector<boost::shared_ptr<std::thread>> threads;
+	/// The io_context used to perform asynchronous operations.
+	boost::asio::io_context io_context_;
+
+	std::string server;
+	std::string port;
 };
-#endif //ALIAS__ASYNC_HTTP_CLIENT_H_
+
+#endif //ALIAS_ASYNC_HTTP_CLIENT_H
