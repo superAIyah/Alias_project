@@ -33,45 +33,27 @@ class Client
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::results));
   }
-
  private:
-  typedef struct
+  struct Request
   {
-    std::string login;
-    int difficulty;
-    int num_of_players;
-    int num_of_teams;
-    int round_duration;
-  } send_settings_struct;
-
-  typedef struct 
-  {
-    int game_id;
-    int team_id;
-    std::vector <std::string> users_login;
-    std::string host;
-  } get_settings_struct;
-
-struct Request
-{
     std::string method;
     std::unordered_map<std::string, std::string> parameters;
-}; 
+  };
 
 
-void parse_settings(std::string req_data)
-{
-	std::vector<std::string> request_arr;
-	boost::split(request_arr, req_data, [](char c) { return c == ':'; });
+  void parse_settings(std::string req_data)
+  {
+    std::vector<std::string> request_arr;
+    boost::split(request_arr, req_data, [](char c) { return c == ':'; });
 
-	settings.game_id = std::stoi(request_arr[1]);
-	settings.team_id = std::stoi(request_arr[2]);
-  settings.host = request_arr[3];
-  std::vector<std::string> users_login;
-  for (size_t i = 3; i != request_arr.size(); i++)
-    users_login.push_back(request_arr[i]);
-  settings.users_login = users_login;
-}
+    settings.game_id = std::stoi(request_arr[1]);
+    settings.team_id = std::stoi(request_arr[2]);
+    settings.host = request_arr[3];
+    std::vector<std::string> users_login;
+    for (size_t i = 3; i != request_arr.size(); i++)
+      users_login.push_back(request_arr[i]);
+    settings.users_login = users_login;
+  }
 
 // 	if (request.method == "msg")
 //   {
@@ -99,120 +81,142 @@ void parse_settings(std::string req_data)
       // char[10000] send = data – Данные в строке для Влада
 
 //      функция которая считывает ообщение от сервера пусть хранится у тебя в переменной под названием recieve_
-// recieve - settings:game_id:team_id:player1_login:player2_login:player3_login: 
+// recieve - settings:game_id:team_id:player1_login:player2_login:player3_login:
       parse_settings(std::string(recieve_)); //parse_settings запихнул данные в атрибут settings
       //
       // Федя-Мансур
       //
+      Thread(handle_write_request) tcp_thread;
+      tcp_thread.join();
     }
     else
     {
-    
-    }
-  }
-  void handle_resolve(const boost::system::error_code& err,
-                      const tcp::resolver::results_type& endpoints)
-  {
-    if (!err)
-    {
-      // Attempt a connection to each endpoint in the list until we
-      // successfully establish a connection.
-      boost::asio::async_connect(socket_, endpoints,
-                                 boost::bind(&Client::handle_connect, this,
-                                             boost::asio::placeholders::error));
-    }
-    else
-    {
-      std::cout << "Error: " << err.message() << "\n";
-    }
-  }
-
-  void handle_connect(const boost::system::error_code& err)
-  {
-    if (!err)
-    {
-      std::string buffer = Request2String(request_);
-
-      // The connection was successful. Send the request.
-      boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
-                               boost::bind(&Client::handle_write_request, this,
-                                           boost::asio::placeholders::error));
-    }
-    else
-    {
-      std::cout << "Error: " << err.message() << "\n";
-    }
-  }
-
-  void handle_write_request(const boost::system::error_code& err)
-  {
-    if (!err)
-    {
-      // Read the response status line. The response_ streambuf will
-      // automatically grow to accommodate the entire line. The growth may be
-      // limited by passing a maximum size to the streambuf constructor.
-      boost::asio::async_read_until(socket_, response_buf_, "\r\n",
-                                    boost::bind(&Client::handle_read_status_line, this,
-                                                boost::asio::placeholders::error));
-    }
-    else
-    {
-      std::cout << "Error: " << err.message() << "\n";
-    }
-  }
-
-  void handle_read_status_line(const boost::system::error_code& err)
-  {
-    if (!err)
-    {
-      // Check that response is OK.
-      std::istream response_stream(&response_buf_);
-      response_stream >> response_.http_version;
-      response_stream >> response_.status_code;
-      std::getline(response_stream, response_.status_message);
-
-      if (response_.status_code != 200)
+      if (protocol == "warning")
       {
-        std::cout << "Response returned with status code ";
-        std::cout << response_.status_code << "\n";
-        return;
+        //  Предупреждение о нарушении правил
       }
-
-      // Read the response headers, which are terminated by a blank line.
-      boost::asio::async_read_until(socket_, response_buf_, "\r\n\r\n",
-                                    boost::bind(&Client::handle_read_headers, this,
-                                                boost::asio::placeholders::error));
-    }
-    else
-    {
-      std::cout << "Error: " << err << "\n";
+      else {
+        if (protocol == "msg")
+        {
+          // Отрисовка у Феди
+        }
+        else {
+          if (protocol == "guess")
+          {
+            // Обновление лидерборда
+          }
+          else {
+            if (protocol == "round")
+            {
+              // Обновление ведущего
+            }
+            else {
+              if (protocol == "game_over")
+              {
+                //  Конец игры
+              }
+            }
+          }
+        }
+      }
     }
   }
-
-  void handle_read_headers(const boost::system::error_code& err)
+}
+void handle_resolve(const boost::system::error_code& err,
+                    const tcp::resolver::results_type& endpoints)
+{
+  if (!err)
   {
-    if (!err)
-    {
-      // Process the response headers.
-      std::istream response_stream(&response_buf_);
-
-      std::string header;
-      while (std::getline(response_stream, header) && header != "\r")
-        response_.headers.push_back(header);
-
-      // Start reading remaining data until EOF.
-      boost::asio::async_read(socket_, response_buf_,
-                              boost::asio::transfer_at_least(1),
-                              boost::bind(&Client::handle_read_content, this,
-                                          boost::asio::placeholders::error));
-    }
-    else
-    {
-      std::cout << "Error: " << err << "\n";
-    }
+    // Attempt a connection to each endpoint in the list until we
+    // successfully establish a connection.
+    boost::asio::async_connect(socket_, endpoints,
+                               boost::bind(&Client::handle_connect, this,
+                                           boost::asio::placeholders::error));
   }
+  else
+  {
+    std::cout << "Error: " << err.message() << "\n";
+  }
+}
 
-void handle_read_headers(const boost::system::error_code& err)
+void handle_connect(const boost::system::error_code& err)
+{
+  if (!err)
+  {
+    std::string buffer = Request2String(request_);
+
+    // The connection was successful. Send the request.
+    boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+                             boost::bind(&Client::handle_write_request, this,
+                                         boost::asio::placeholders::error));
+  }
+  else
+  {
+    std::cout << "Error: " << err.message() << "\n";
+  }
+}
+
+void handle_write_request(const boost::system::error_code& err)
+{
+  if (!err)
+  {
+    // Read the response status line. The response_ streambuf will
+    // automatically grow to accommodate the entire line. The growth may be
+    // limited by passing a maximum size to the streambuf constructor.
+    boost::asio::async_read_until(socket_, response_buf_, "\r\n",
+                                  boost::bind(&Client::handle_connect, this,
+                                              boost::asio::placeholders::error));
+  }
+  else
+  {
+    std::cout << "Error: " << err.message() << "\n";
+  }
+}
+private:
+typedef struct
+{
+  std::string login;
+  int difficulty;
+  int num_of_players;
+  int num_of_teams;
+  int round_duration;
+} send_settings_struct;
+
+typedef struct
+{
+  int game_id;
+  int team_id;
+  std::vector <std::string> users_login;
+  std::string host;
+} get_settings_struct;
+
+tcp::resolver resolver_;
+tcp::socket socket_;
+
+boost::asio::streambuf response_buf_;
+
+Request request_;
+Response response_;
+};
+
+int main(int argc, char* argv[])
+{
+  try
+  {
+    if (argc != 4)
+    {
+      std::cout << "Usage: async_client <server> <port> <path>\n";
+      std::cout << "Example:\n";
+      std::cout << "  async_client www.boost.org /LICENSE_1_0.txt\n";
+      return 1;
+    }
+
+    boost::asio::io_context io_context;
+
+    Client c(io_context, argv[1], argv[2], argv[3]);
+    io_context.run();
+  }
+  catch (std::exception& e)
   {
     std::cout << "Exception: " << e.what() << "\n";
   }
