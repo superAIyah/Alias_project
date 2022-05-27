@@ -10,6 +10,48 @@
 
 using boost::asio::ip::tcp;
 
+Client::Client(boost::asio::io_context& io_context,
+const std::string& server, const std::string& port, const std::string& path)
+: resolver_(io_context),
+socket_(io_context)
+{
+  // Start an asynchronous resolve to translate the Client and service names
+  // into a list of endpoints.
+  resolver_.async_resolve(server, port,
+                          boost::bind(&Client::handle_resolve, this,
+                                      boost::asio::placeholders::error,
+                                      boost::asio::placeholders::results));
+}
+
+void Client::handle_resolve(const boost::system::error_code& err,
+                    const tcp::resolver::results_type& endpoints)
+{
+  if (!err)
+  {
+    Connection *conn = new Connection(io_context_, request_router);
+    conn->SetServer(this);
+    new_connection_.reset(conn);
+    // Attempt a connection to each endpoint in the list until we
+    // successfully establish a connection.
+    boost::asio::async_connect(socket_, endpoints,
+                               boost::bind(&ClientConnection::handle_connect, this,
+                                           boost::asio::placeholders::error));
+  }
+  else
+  {
+    std::cout << "Error: " << err.message() << "\n";
+  }
+}
+
+void Client::run() {
+  // Create a pool of threads to run all of the io_contexts.
+  thread_ = new std::thread(
+        boost::bind(&boost::asio::io_context::run, &io_context_));
+
+  // Wait for all threads in the pool to exit.
+    thread_->join();
+}
+
 Request parse(std::string req_data) {
   Request request;
   std::vector<std::string> request_arr;
@@ -64,18 +106,18 @@ Request parse(std::string req_data) {
   return request;
 }
 
-class Client
+class ClientConnection
 {
  public:
-  Client(boost::asio::io_context& io_context,
-         const std::string& server, const std::string& port, const std::string& path)
+  ClientConnection(boost::asio::io_context& io_context,
+         const std::string& Client, const std::string& port, const std::string& path)
       : resolver_(io_context),
         socket_(io_context)
   {
-    // Start an asynchronous resolve to translate the server and service names
+    // Start an asynchronous resolve to translate the Client and service names
     // into a list of endpoints.
-    resolver_.async_resolve(server, port,
-                            boost::bind(&Client::handle_resolve, this,
+    resolver_.async_resolve(Client, port,
+                            boost::bind(&ClientConnection::handle_resolve, this,
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::results));
   }
@@ -123,23 +165,6 @@ class Client
     boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
                              boost::bind(&Connection::handle_multiwrite, shared_from_this(),
                                          boost::asio::placeholders::error));
-  }
-
-  void handle_resolve(const boost::system::error_code& err,
-                      const tcp::resolver::results_type& endpoints)
-  {
-    if (!err)
-    {
-      // Attempt a connection to each endpoint in the list until we
-      // successfully establish a connection.
-      boost::asio::async_connect(socket_, endpoints,
-                                 boost::bind(&Client::handle_connect, this,
-                                             boost::asio::placeholders::error));
-    }
-    else
-    {
-      std::cout << "Error: " << err.message() << "\n";
-    }
   }
 
   void handle_read(const boost::system::error_code& err)
@@ -201,7 +226,7 @@ class Client
       // automatically grow to accommodate the entire line. The growth may be
       // limited by passing a maximum size to the streambuf constructor.
       socket_.async_read_some(boost::asio::buffer(response_buf_),
-                                    boost::bind(&Client::handle_read, this,
+                                    boost::bind(&ClientConnection::handle_read, this,
                                                 boost::asio::placeholders::error));
     }
     else
@@ -231,6 +256,8 @@ class Client
   std::string game_id_;
   std::string team_id_;
 
+  boost::shared_ptr<std::thread> thread_;
+
   bool host_;
 };
 
@@ -240,7 +267,7 @@ int main(int argc, char* argv[])
   {
     if (argc != 4)
     {
-      std::cout << "Usage: async_client <server> <port> <path>\n";
+      std::cout << "Usage: async_client <Client> <port> <path>\n";
       std::cout << "Example:\n";
       std::cout << "  async_client www.boost.org /LICENSE_1_0.txt\n";
       return 1;
@@ -248,7 +275,7 @@ int main(int argc, char* argv[])
 
     boost::asio::io_context io_context;
 
-    Client c(io_context, argv[1], argv[2], argv[3]);
+    ClientConnection c(io_context, argv[1], argv[2], argv[3]);
     io_context.run();
   }
   catch (std::exception& e)
