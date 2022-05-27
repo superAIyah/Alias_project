@@ -6,9 +6,9 @@
 #include <iostream>
 #include <QDebug>
 
-ConfigWindow::ConfigWindow(QWidget *parent) :
+ConfigWindow::ConfigWindow(Client* cl, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ConfigWindow)
+    ui(new Ui::ConfigWindow), client_(cl)
 {
     ui->setupUi(this);
     gameWindow = new GameWindow();
@@ -43,9 +43,15 @@ void ConfigWindow::on_findGameButton_clicked()
     qDebug() << game_config.GetSettings().c_str();
 
     // <-- вызов функции поиска игры клиента  -->
+	client_->send_settings(game_config);
 
     // ... Когда игра найдена начинается игра ...
     // как вызывать?
-    gameWindow->show();
+//    gameWindow->show();
+//    this->hide();
+}
+
+void ConfigWindow::next_window(){
+	gameWindow->show();
     this->hide();
 }

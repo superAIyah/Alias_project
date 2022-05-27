@@ -7,16 +7,16 @@ MainWindow::MainWindow(Client* cl, QWidget *parent)
     , ui(new Ui::MainWindow), client_(cl)
 {
     ui->setupUi(this);
-    configWindow = new ConfigWindow();
+    configWindow = new ConfigWindow(cl);
 }
 
-MainWindow::MainWindow(QWidget *parent)
-		: QMainWindow(parent)
-		, ui(new Ui::MainWindow)
-{
-	ui->setupUi(this);
-	configWindow = new ConfigWindow();
-}
+//MainWindow::MainWindow(QWidget *parent)
+//		: QMainWindow(parent)
+//		, ui(new Ui::MainWindow)
+//{
+//	ui->setupUi(this);
+//	configWindow = new ConfigWindow(cl);
+//}
 
 MainWindow::~MainWindow()
 {

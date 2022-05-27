@@ -13,8 +13,8 @@
 
 class Client;
 
-#include "mainwindow.h"
-#include "iclientinterface.h"
+#include "GUI/window_autorise/headers/mainwindow.h"
+//#include "iclientinterface.h"
 #include <QApplication>
 
 #include "response.h"
@@ -26,15 +26,6 @@ using boost::asio::ip::tcp;
 class Client {
 public:
 	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_);
-
-
-	std::string serialize_auth(std::string user_login);
-
-	std::string serialize_settings(GameConfig settings);
-
-	std::string serialize_msg(Message msg);
-
-	std::string serialize_round();
 
 	void send_auth(std::string user_login);
 
@@ -56,6 +47,16 @@ public:
 	void run();
 
 private:
+	Request parse(std::string req_data);
+
+	std::string serialize_auth(std::string user_login);
+
+	std::string serialize_settings(GameConfig settings);
+
+	std::string serialize_msg(Message msg);
+
+	std::string serialize_round();
+
 	tcp::resolver resolver_;
 	tcp::socket socket_;
 
@@ -69,8 +70,11 @@ private:
 	std::string user_login_;
 	std::string game_id_;
 	std::string team_id_;
+	std::vector<std::string> team_players;
 
-	bool host_;
+	std::string host_login;
+
+	bool is_host_;
 
 
 	std::vector<boost::shared_ptr<std::thread>> threads;

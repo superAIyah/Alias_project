@@ -3,10 +3,11 @@
 
 class MainWindow;
 
+#include "../../../async.http.client.h"
 #include "configwindow.h"
 #include <QMainWindow>
 //#include "gamewindow.h"
-#include "../../../async.http.client.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,7 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow(Client* cl, QWidget *parent = nullptr);
-	MainWindow(QWidget *parent = nullptr);
+//	MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow();
 	void next_window();

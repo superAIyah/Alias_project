@@ -2,7 +2,7 @@
 
 using boost::asio::ip::tcp;
 
-Request parse(std::string req_data) {
+Request Client::parse(std::string req_data) {
 	Request request;
 	std::vector<std::string> request_arr;
 
@@ -33,11 +33,14 @@ Request parse(std::string req_data) {
 	request.method = request_arr[0];
 
 	if (request.method == "settings") {
-		request.parameters["user_login"] = request_arr[1];
-		request.parameters["level"] = request_arr[2];
-		request.parameters["num_players"] = request_arr[3];
-		request.parameters["num_teams"] = request_arr[4];
-		request.parameters["round_duration"] = request_arr[5];
+		game_id_ = request_arr[1];
+		team_id_ = request_arr[2];
+
+		for(int i=3; i<request_arr.size(); ++i){
+			team_players.push_back(request_arr[i]);
+		}
+		is_host_ = (team_players[0] == user_login_);
+		host_login = team_players[0];
 	}
 	if (request.method == "keyword") {
 		request.parameters["new_keyword"] = request_arr[1];
@@ -89,7 +92,7 @@ std::string Client::serialize_settings(GameConfig settings) {
 }
 
 std::string Client::serialize_msg(Message msg) {
-	return "msg\r\n" + user_login_ + "\r\n" + game_id_ + "\r\n" + team_id_ + "\r\n" + msg.msg + "\r\n" + (host_ ? "host" : "not_host");
+	return "msg\r\n" + user_login_ + "\r\n" + game_id_ + "\r\n" + team_id_ + "\r\n" + msg.msg + "\r\n" + (is_host_ ? "host" : "not_host");
 }
 
 std::string Client::serialize_round() {
@@ -97,6 +100,7 @@ std::string Client::serialize_round() {
 }
 
 void Client::send_auth(std::string user_login) {
+	user_login_ = user_login;
 	std::string str = serialize_auth(user_login);
 	boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
 	                         boost::bind(&Client::handle_multiwrite, this,
@@ -160,7 +164,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "settings") {
-
+			w->configWindow->next_window();
 		}
 
 		if (request.method == "msg") {
