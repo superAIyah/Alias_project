@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(AliasProject LANGUAGES CXX)
+project(GUI_lib LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -25,34 +25,12 @@ message("GAME_INCLUDE_DIRS = ${GAME_INCLUDE_DIRS}") # проверка сбор�
 message("GAME_LIB_LIBRARIES = ${GAME_LIB_LIBRARIES}")
 
 
-add_executable(AliasProject
-    main.cpp
-    # 1 ОКНО
-    #mainwindow.cpp
-    #mainwindow.h
-    #mainwindow.ui
-    #User.h
+add_library(GUI_lib STATIC) # создаем библиотеку всего GUI
 
-    # 2 ОКНО
-    # configwindow.cpp
-    # configwindow.h
-    # configwindow.ui
-
-    # ISetting.h
-    # Setting.h
-    # Setting.cpp
-
-    # gameconfig.h
-    # gameconfig.cpp
-
-    # gamebuilder.h
-    # gamebuilder.cpp
-)
-
-target_link_libraries(AliasProject PRIVATE Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt5::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC ${AUTORISE_LIB_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${AUTORISE_LIB_LIBRARIES}) # подключение библиотека окна авторизации
+target_link_libraries(${PROJECT_NAME} PUBLIC ${AUTORISE_LIB_LIBRARIES}) # подключение библиотека окна авторизации
 target_include_directories(${PROJECT_NAME} PUBLIC ${CONFIGS_LIB_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CONFIGS_LIB_LIBRARIES}) # подключение библиотека окна конфигураций
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CONFIGS_LIB_LIBRARIES}) # подключение библиотека окна конфигураций
 target_include_directories(${PROJECT_NAME} PUBLIC ${GAME_LIB_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${GAME_LIB_LIBRARIES}) # подключение библиотека окна игры
+target_link_libraries(${PROJECT_NAME} PUBLIC ${GAME_LIB_LIBRARIES}) # подключение библиотека окна игры
