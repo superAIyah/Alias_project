@@ -25,8 +25,29 @@ message("GAME_INCLUDE_DIRS = ${GAME_INCLUDE_DIRS}") # проверка сбор�
 message("GAME_LIB_LIBRARIES = ${GAME_LIB_LIBRARIES}")
 
 
-#add_executable(AliasProject main.cpp)
-add_library(${PROJECT_NAME})
+add_executable(AliasProject
+    main.cpp
+    # 1 ОКНО
+    #mainwindow.cpp
+    #mainwindow.h
+    #mainwindow.ui
+    #User.h
+
+    # 2 ОКНО
+    # configwindow.cpp
+    # configwindow.h
+    # configwindow.ui
+
+    # ISetting.h
+    # Setting.h
+    # Setting.cpp
+
+    # gameconfig.h
+    # gameconfig.cpp
+
+    # gamebuilder.h
+    # gamebuilder.cpp
+)
 
 target_link_libraries(AliasProject PRIVATE Qt5::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC ${AUTORISE_LIB_INCLUDE_DIRS})
