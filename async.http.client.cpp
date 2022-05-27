@@ -37,18 +37,28 @@ Request parse(std::string req_data) {
     request.parameters["num_teams"] = request_arr[4];
     request.parameters["round_duration"] = request_arr[5];
   }
+  if (request.method == "keyword") {
+    request.parameters["new_keyword"] = request_arr[1];
+  }
+  if (request.method == "warning") {
+    request.parameters["warning_text"] = request_arr[1];
+  }
   if (request.method == "msg") {
     request.parameters["user_login"] = request_arr[1];
-    request.parameters["game_id"] = request_arr[2];
-    request.parameters["team_id"] = request_arr[3];
-    request.parameters["text"] = request_arr[4];
-    request.parameters["who"] = request_arr[5];//ведущий или отгадывающий
+    request.parameters["text"] = request_arr[2];
+  }
+  if (request.method == "guess") {
+    request.parameters["user_login"] = request_arr[1];
+    request.parameters["team_id"] = request_arr[2];
+    request.parameters["text"] = request_arr[3];
+    request.parameters["user_pts"] = request_arr[4];
+    request.parameters["host_pts"] = request_arr[5];
   }
   if (request.method == "round") {
     request.parameters["game_id"] = request_arr[1];
   }
   if (request.method == "auth") {
-    request.parameters["user_login"] = request_arr[1];
+    request.parameters["status"] = request_arr[1];
   }
 
   return request;
@@ -62,12 +72,6 @@ class Client
       : resolver_(io_context),
         socket_(io_context)
   {
-    request_.method = "GET";
-    request_.path = path;
-    request_.http_version = "HTTP/1.0";
-    request_.host = server;
-
-
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
     resolver_.async_resolve(server, port,
@@ -142,15 +146,14 @@ class Client
   {
     if (!err)
     {
-      std::string buffer = Request2String(request_);
       //                вывод в консоль
-      std::cout << buffer.data() << std::endl;
+      std::cout << response_buf_.data() << std::endl;
 
 //                парсинг
-      Request request = parse(std::string(buffer.data()));
+      Request request = parse(std::string(response_buf_.data()));
 
 //              очистка буфера
-      buffer_.fill('\0');
+      response_buf_.fill('\0');
       if (request.method == "auth") {
         if (request.parameters["status"] == "ok") {
           //  Вызываем функцию ФЕДИ! (для открытия окна)
