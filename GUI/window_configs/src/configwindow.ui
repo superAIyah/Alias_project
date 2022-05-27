@@ -29,13 +29,59 @@
   <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>50</x>
      <y>40</y>
-     <width>661</width>
-     <height>191</height>
+     <width>911</width>
+     <height>201</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QGroupBox" name="BoxMode">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Уровень сложности</string>
+      </property>
+      <widget class="QWidget" name="layoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>183</width>
+         <height>141</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QRadioButton" name="d1">
+          <property name="text">
+           <string>легкий</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="d2">
+          <property name="text">
+           <string>средний</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="d3">
+          <property name="text">
+           <string>трудный</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
     <item>
      <widget class="QGroupBox" name="BoxTeamSz">
       <property name="minimumSize">
@@ -60,7 +106,7 @@
         <item>
          <widget class="QRadioButton" name="c1">
           <property name="text">
-           <string>1 (одиночный режим)</string>
+           <string>(одиночный режим)</string>
           </property>
          </widget>
         </item>
@@ -113,6 +159,7 @@
          <x>20</x>
          <y>30</y>
          <width>183</width>
+
          <height>141</height>
         </rect>
        </property>
@@ -120,7 +167,7 @@
         <item>
          <widget class="QRadioButton" name="b1">
           <property name="text">
-           <string>1 (одиночный режим)</string>
+           <string>(одиночный режим)</string>
           </property>
          </widget>
         </item>

@@ -157,6 +157,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 			if (request.parameters["status"] == "ok") {
 				//  Вызываем функцию ФЕДИ! (для открытия окна)
 				w->next_window();
+				handle_write(err);
 			}
 			else if (request.parameters["status"] == "already_online") {
 				//  Вызываем функцию ФЕДИ! (для вывода ошибки)
@@ -165,6 +166,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 
 		if (request.method == "settings") {
 			w->configWindow->next_window();
+			handle_write(err);
 		}
 
 		if (request.method == "msg") {
@@ -184,6 +186,10 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "keyword") {
+
+		}
+
+		if (request.method == "warning") {
 
 		}
 	}
