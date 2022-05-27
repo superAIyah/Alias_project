@@ -12,7 +12,7 @@ auth:user_login:
 
 ### от сервера:
 
-auth:[ok/already_online]
+auth:[ok/already_online]:
 
 ## Для поиска игры:
 
