@@ -53,7 +53,7 @@ class Client
 //    std::string protocol = get_from_gui();
     if (protocol == "settings") {
       // Получил данные от Феди
-      // char[10000] send = data – Данные в строке для Влада
+      // char[10000] sent_ = data – Данные в строке для Влада
     }
     else {
     }
