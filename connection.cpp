@@ -16,17 +16,27 @@ Request parse(std::string req_data) {
 	std::vector<std::string> request_arr;
 
 //	for testing
-	boost::split(request_arr, req_data, [](char c) { return c == ':'; });
+//	boost::split(request_arr, req_data, [](char c) { return c == ':'; });
 
 //  for deploy
-//	std::regex rx("[^\\s]+\r\n");
+//	std::regex rx("[^\r\n]+\r\n");
 //	std::sregex_iterator re_it(req_data.begin(), req_data.end(), rx), rxend;
-//
+
 //	while(re_it != rxend)
 //	{
-//		request_arr.push_back(re_it->str());
+//		request_arr.push_back(re_it->str().erase(re_it->str().size()));
 //		++re_it;
 //	}
+
+	size_t pos = 0;
+	std::string token;
+	while ((pos = req_data.find("\r\n")) != std::string::npos) {
+		token = req_data.substr(0, pos);
+//		std::cout << token << std::endl;
+		request_arr.push_back(token);
+		req_data.erase(0, pos + 2);
+	}
+	request_arr.push_back(req_data);
 
 
 	request.method = request_arr[0];
@@ -111,6 +121,7 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 
 		if (request.method == "auth") {
 			std::string user_login = request.parameters["user_login"];
+
 //			если пользователь есть в БД
 			if (Server->UDBM->has_user(user_login)) {
 //				если пользователь уже онлайн
@@ -171,7 +182,11 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 			//количество игроков нужное для начала игры
 			int num_players_needed = num_players * num_teams;
 //                    добавляет в линию ожидания
-			Server->WaitingLine[settings_str].players.emplace_back(&socket_, request.parameters.at("user_login"));
+			std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> *waiting_players_ptr = &(Server->WaitingLine[settings_str].players);
+			if (std::find(waiting_players_ptr->begin(), waiting_players_ptr->end(), std::make_pair(&socket_, request.parameters.at("user_login"))) ==
+			    waiting_players_ptr->end()) {
+				waiting_players_ptr->emplace_back(&socket_, request.parameters.at("user_login"));
+			}
 
 
 //                    если этот клиент пришел последним, и теперь в комнате достаточно человек
@@ -179,11 +194,11 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 
 //                        заполняем комнату
 				for (int i = 0; i < num_players_needed; ++i) {
-					if (Server->players_online.contains(Server->WaitingLine[settings_str].players[i].second)) {
-						room.push_back(Server->WaitingLine[settings_str].players[i]);
+					if (Server->players_online.contains((*waiting_players_ptr)[i].second)) {
+						room.push_back((*waiting_players_ptr)[i]);
 					}
 					else {
-						Server->WaitingLine[settings_str].players.erase(Server->WaitingLine[settings_str].players.begin() + i);
+						waiting_players_ptr->erase(waiting_players_ptr->begin() + i);
 						return handle_write(e);
 					}
 				}
@@ -386,7 +401,7 @@ void Connection::handle_read(const boost::system::error_code &e, std::size_t byt
 						std::stringstream ss;
 						ss << "guess\r\n";
 						ss << login << "\r\n" << team_id << "\r\n" << text << "\r\n" << USER_GUESS_POINTS << "\r\n"
-						   << HOST_GUESS_POINTS;
+						   << HOST_GUESS_POINTS << "\r\n";
 //                            ss << "\n";////////////////////////////////////////////////
 						std::string buffer = ss.str();
 
