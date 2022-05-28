@@ -27,20 +27,32 @@ Request Client::parse(std::string req_data) {
 		request_arr.push_back(token);
 		req_data.erase(0, pos + 2);
 	}
-	request_arr.push_back(req_data);
+//	request_arr.push_back(req_data);
 
 
 	request.method = request_arr[0];
 
 	if (request.method == "settings") {
-		game_id_ = request_arr[1];
-		team_id_ = request_arr[2];
+		game_id_ = std::stoi(request_arr[1]);
+		team_id_ = std::stoi(request_arr[2]);
 
-		for(int i=3; i<request_arr.size(); ++i){
+		for (int i = 3; i < request_arr.size(); ++i) {
 			team_players.push_back(request_arr[i]);
 		}
 		is_host_ = (team_players[0] == user_login_);
 		host_login = team_players[0];
+		if (num_teams_>1){
+			for(int i=1; i<=num_teams_; ++i){
+				leaderboard_.leaders.push_back(Leader("Team "+std::to_string(i), 0, false));
+			}
+		}
+		else {
+			for(int i=0; i<team_players.size(); ++i){
+				leaderboard_.leaders.push_back(Leader(team_players[i], 0, (i==0)));
+			}
+		}
+		leaderboard_.size = leaderboard_.leaders.size();
+//		std::cout<<leaderboard_.size;
 	}
 	if (request.method == "keyword") {
 		request.parameters["new_keyword"] = request_arr[1];
@@ -56,8 +68,24 @@ Request Client::parse(std::string req_data) {
 		request.parameters["user_login"] = request_arr[1];
 		request.parameters["team_id"] = request_arr[2];
 		request.parameters["text"] = request_arr[3];
-		request.parameters["user_pts"] = request_arr[4];
-		request.parameters["host_pts"] = request_arr[5];
+
+		int host_pts = std::stoi(request_arr[5]);
+
+		if(num_teams_>1){
+			leaderboard_.leaders[std::stoi(request.parameters["team_id"])-1].points += host_pts;
+		}
+		else {
+			int user_pts = std::stoi(request_arr[4]);
+			for(int i=0; i<leaderboard_.size; ++i){
+				if(leaderboard_.leaders[i].name == request.parameters["user_login"]){
+					leaderboard_.leaders[i].points += user_pts;
+				}
+				if(leaderboard_.leaders[i].host){
+					leaderboard_.leaders[i].points += host_pts;
+				}
+			}
+		}
+
 	}
 	if (request.method == "round") {
 		request.parameters["game_id"] = request_arr[1];
@@ -71,7 +99,7 @@ Request Client::parse(std::string req_data) {
 
 
 Client::Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_) :
-							resolver_ (io_context), socket_(io_context), server(server_), port(port_) {
+		resolver_(io_context), socket_(io_context), server(server_), port(port_) {
 	w = new MainWindow(this);
 	w->show();
 	// Start an asynchronous resolve to translate the server and service names
@@ -92,11 +120,11 @@ std::string Client::serialize_settings(GameConfig settings) {
 }
 
 std::string Client::serialize_msg(Message msg) {
-	return "msg\r\n" + user_login_ + "\r\n" + game_id_ + "\r\n" + team_id_ + "\r\n" + msg.msg + "\r\n" + (is_host_ ? "host" : "not_host");
+	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" + (is_host_ ? "host" : "not_host");
 }
 
 std::string Client::serialize_round() {
-	return "round\r\n" + game_id_;
+	return "round\r\n" + std::to_string(game_id_);
 }
 
 void Client::send_auth(std::string user_login) {
@@ -107,14 +135,17 @@ void Client::send_auth(std::string user_login) {
 	                                     boost::asio::placeholders::error));
 }
 
-void Client::send_settings(GameConfig settings) {
+void Client::send_settings(GameConfig settings, int num_teams) {
+	num_teams_ = num_teams;
+
 	std::string str = serialize_settings(settings);
 	boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
 	                         boost::bind(&Client::handle_multiwrite, this,
 	                                     boost::asio::placeholders::error));
 }
 
-void Client::send_msg(Message msg) {
+void Client::send_msg(std::string text) {
+	Message msg(user_login_, true, text);
 	std::string str = serialize_msg(msg);
 	boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
 	                         boost::bind(&Client::handle_multiwrite, this,
@@ -129,7 +160,7 @@ void Client::send_round() {
 }
 
 void Client::handle_resolve(const boost::system::error_code &err,
-                    const tcp::resolver::results_type &endpoints) {
+                            const tcp::resolver::results_type &endpoints) {
 	if (!err) {
 		// Attempt a Client to each endpoint in the list until we
 		// successfully establish a Client.
@@ -166,15 +197,25 @@ void Client::handle_read(const boost::system::error_code &err) {
 
 		if (request.method == "settings") {
 			w->configWindow->next_window();
+			w->configWindow->gameWindow->UpdateLeaderboard(leaderboard_);
 			handle_write(err);
 		}
 
 		if (request.method == "msg") {
-
+			w->configWindow->gameWindow->UpdateMessages(Message(request.parameters["user_login"],
+			                                                    (request.parameters["user_login"] == user_login_),
+			                                                    request.parameters["text"]));
+			handle_write(err);
 		}
 
 		if (request.method == "guess") {
-
+			if(std::stoi(request.parameters["team_id"]) == team_id_) {
+				w->configWindow->gameWindow->UpdateMessages(Message(request.parameters["user_login"],
+				                                                    (request.parameters["user_login"] == user_login_),
+				                                                    request.parameters["text"]));
+			}
+			w->configWindow->gameWindow->UpdateLeaderboard(leaderboard_);
+			handle_write(err);
 		}
 
 		if (request.method == "round") {
@@ -186,11 +227,13 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "keyword") {
-
+			w->configWindow->gameWindow->UpdateKeyword(request.parameters["new_keyword"]);
+			handle_write(err);
 		}
 
 		if (request.method == "warning") {
-
+			w->configWindow->gameWindow->spoiler_warning();
+			handle_write(err);
 		}
 	}
 	else {
@@ -222,12 +265,16 @@ void Client::handle_multiwrite(const boost::system::error_code &e) {
 }
 
 void Client::run() {
-	boost::shared_ptr<std::thread> newthread(new std::thread(
-			boost::bind(&boost::asio::io_context::run, &io_context_)));
-	threads.push_back(newthread);
+//	boost::shared_ptr<std::thread> newthread(new std::thread(
+//			boost::bind(&boost::asio::io_context::run, &io_context_)));
+//	threads.push_back(newthread);
+//
+//	threads[0]->join();
 
-	threads[0]->join();
-
+//	QThread* newthread = new QThread;
+//	this->moveToThread(newthread);
+//	io_context_.run();
+//	newthread->start();
 }
 
 

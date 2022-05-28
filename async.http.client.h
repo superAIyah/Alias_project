@@ -8,8 +8,12 @@
 #include <boost/bind/bind.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include "gameconfig.h"
+#include <QThread>
+#include <QObject>
+#include "GUI/window_configs/headers/gameconfig.h"
 #include "Message.h"
+#include "LeaderBoard.h"
+#include "Leader.h"
 
 class Client;
 
@@ -23,15 +27,16 @@ class Client;
 using boost::asio::ip::tcp;
 
 
-class Client {
+class Client : QObject {
+//	Q_OBJECT
 public:
 	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_);
 
 	void send_auth(std::string user_login);
 
-	void send_settings(GameConfig settings);
+	void send_settings(GameConfig settings, int num_teams);
 
-	void send_msg(Message msg);
+	void send_msg(std::string text);
 
 	void send_round();
 
@@ -68,13 +73,14 @@ private:
 	MainWindow *w;
 
 	std::string user_login_;
-	std::string game_id_;
-	std::string team_id_;
+	int game_id_;
+	int team_id_;
 	std::vector<std::string> team_players;
-
+	LeaderBoard leaderboard_;
 	std::string host_login;
-
 	bool is_host_;
+
+	int num_teams_;
 
 
 	std::vector<boost::shared_ptr<std::thread>> threads;

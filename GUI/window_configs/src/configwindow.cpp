@@ -11,7 +11,7 @@ ConfigWindow::ConfigWindow(Client* cl, QWidget *parent) :
     ui(new Ui::ConfigWindow), client_(cl)
 {
     ui->setupUi(this);
-    gameWindow = new GameWindow();
+    gameWindow = new GameWindow(cl);
 }
 
 ConfigWindow::~ConfigWindow()
@@ -45,7 +45,7 @@ void ConfigWindow::on_findGameButton_clicked()
     qDebug() << game_config.GetSettings().c_str();
 
     // <-- вызов функции поиска игры клиента  -->
-	client_->send_settings(game_config);
+	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()));
 
     // ... Когда игра найдена начинается игра ...
     // как вызывать?
