@@ -23,7 +23,6 @@ class GameWindow : public QDialog
 
 public:
     explicit GameWindow(Client* cl, QWidget *parent = nullptr);
-	void CreateTimer();
     ~GameWindow();
     Timer *timeController;
     Board *board;

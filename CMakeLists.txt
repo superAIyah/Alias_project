@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.18.4)
-project(Alias)
+cmake_minimum_required(VERSION 3.16)
+project(AliasProject)
 
 find_package(Qt5 COMPONENTS Widgets)
 

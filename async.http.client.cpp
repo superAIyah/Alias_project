@@ -129,8 +129,9 @@ void Client::send_auth(std::string user_login) {
 	                                     boost::asio::placeholders::error));
 }
 
-void Client::send_settings(GameConfig settings, int num_teams) {
+void Client::send_settings(GameConfig settings, int num_teams, int round_duration_) {
 	num_teams_ = num_teams;
+	round_duration = round_duration_;
 
 	std::string str = serialize_settings(settings);
 	boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),

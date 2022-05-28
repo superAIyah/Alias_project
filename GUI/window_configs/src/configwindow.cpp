@@ -45,17 +45,10 @@ void ConfigWindow::on_findGameButton_clicked()
     qDebug() << game_config.GetSettings().c_str();
 
     // <-- вызов функции поиска игры клиента  -->
-	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()));
-
-    // ... Когда игра найдена начинается игра ...
-    // как вызывать?
-//    gameWindow->show();
-//    this->hide();
+	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
 
 void ConfigWindow::next_window(){
-//	gameWindow->CreateTimer();
 	gameWindow->ShowWindow();
-//	gameWindow->timeController->start();
     this->hide();
 }

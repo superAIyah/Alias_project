@@ -48,7 +48,7 @@ public:
 
 	void send_auth(std::string user_login);
 
-	void send_settings(GameConfig settings, int num_teams);
+	void send_settings(GameConfig settings, int num_teams, int round_duration_);
 
 	void send_msg(std::string text);
 
@@ -64,6 +64,8 @@ public:
 	void handle_multiwrite(const boost::system::error_code &e);
 
 	void run();
+
+	int RoundDuration(){return round_duration;}
 
 private:
 	Request parse(std::string req_data);
