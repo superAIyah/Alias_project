@@ -29,26 +29,38 @@ public:
     Messenger *msg_browser;
     ClientInterface* gui;
     ClientInterface* get_client_interface();
+
 	void UpdateMessages(const Message& new_msg);
 	void UpdateLeaderboard(const LeaderBoard& lb);
 	void UpdateKeyword(std::string new_kw);
 	void ShowWindow();
 	void ShowWarning();
+	void NewRound();
 
 
 private slots:
     void on_pushButton_clicked();
-    void TimerSlot();
-	void TimerStart();
-	void SpoilerWarning();
+    void SlotTimerIt();
+	void SlotTimerStart();
+	void SlotSpoilerWarning();
+	void SlotUpdateLeaderboard();
+	void SlotUpdateMessages();
+	void SlotUpdateKeyword();
 
-public slots:
+//public slots:
 signals:
-	void Show();
-	void Warning();
+	void SigTimerStart();
+	void SigSpoilerWarning();
+	void SigUpdateLeaderboard();
+	void SigUpdateMessages();
+	void SigUpdateKeyword();
+
 private:
     Ui::GameWindow *ui;
 	Client* client_;
+	std::string keyword;
+	LeaderBoard leaderboard;
+	Message last_msg;
 };
 
 #endif // GAMEWINDOW_H

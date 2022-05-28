@@ -9,63 +9,73 @@ GameWindow::GameWindow(Client* cl, QWidget *parent) :
     timeController = new Timer(ui->labelTime); // создание таймера
     board = new Board(ui->tableBoard); // создание таблички
     msg_browser = new Messenger(ui->textBrowser, ui->labelWord); // создание мессенджера
-
     gui = new ClientInterface(timeController, msg_browser, board);
-    connect(timeController->timer, SIGNAL(timeout()), this, SLOT(TimerSlot()));
-	connect(this, SIGNAL(Show()), this, SLOT(TimerStart()));
-	connect(this, SIGNAL(Warning()), this, SLOT(SpoilerWarning()));
-}
 
-void GameWindow::ShowWindow(){
-	show();
-	emit Show();
-}
+    connect(timeController->timer, SIGNAL(timeout()), this, SLOT(SlotTimerIt()));
+	connect(this, SIGNAL(SigTimerStart()), this, SLOT(SlotTimerStart()));
+	connect(this, SIGNAL(SigSpoilerWarning()), this, SLOT(SlotSpoilerWarning()));
+	connect(this, SIGNAL(SigUpdateMessages()), this, SLOT(SlotUpdateMessages()));
+	connect(this, SIGNAL(SigUpdateKeyword()), this, SLOT(SlotUpdateKeyword()));
+	connect(this, SIGNAL(SigUpdateLeaderboard()), this, SLOT(SlotUpdateLeaderboard()));
 
-void GameWindow::TimerStart(){
-	timeController->start(client_->RoundDuration());
 }
 
 GameWindow::~GameWindow()
 {
     delete ui;
 }
-
 ClientInterface *GameWindow::get_client_interface()
 {
     return gui;
 }
 
-void GameWindow::TimerSlot()
+void GameWindow::ShowWindow(){
+	show();
+	emit SigTimerStart();
+}
+void GameWindow::ShowWarning(){
+	emit SigSpoilerWarning();
+}
+void GameWindow::NewRound(){
+	emit SigTimerStart();
+}
+void GameWindow::UpdateMessages(const Message& new_msg){
+	last_msg = new_msg;
+	emit SigUpdateMessages();
+}
+void GameWindow::UpdateLeaderboard(const LeaderBoard& lb){
+	leaderboard = lb;
+	emit SigUpdateLeaderboard();
+}
+void GameWindow::UpdateKeyword(std::string new_kw){
+	keyword = new_kw;
+	emit SigUpdateKeyword();
+}
+
+void GameWindow::SlotTimerStart(){
+	timeController->start(client_->RoundDuration());
+}
+void GameWindow::SlotSpoilerWarning() {
+	QMessageBox::critical(nullptr, "SigSpoilerWarning!", "You can't use a guessing word.");
+}
+void GameWindow::SlotUpdateLeaderboard(){
+	gui->board->UpdateLeaderboard(leaderboard);
+}
+void GameWindow::SlotUpdateMessages(){
+	std::vector<Message> msgs({last_msg});
+	gui->messenger->ShowMessages(msgs);
+}
+void GameWindow::SlotUpdateKeyword(){
+	gui->messenger->UpdateKeyword(keyword);
+}
+void GameWindow::SlotTimerIt()
 {
-    timeController->iteration(); // итерация таймера
+	timeController->iteration(); // итерация таймера
 //	если равен 0 то раунд
 	if(timeController->time==0){
 		client_->send_round();
 	}
 }
-
-void GameWindow::UpdateMessages(const Message& new_msg){
-	std::vector<Message> msgs({new_msg});
-	gui->messenger->ShowMessages(msgs);
-}
-
-void GameWindow::UpdateLeaderboard(const LeaderBoard& lb){
-	gui->board->UpdateLeaderboard(lb);
-}
-
-void GameWindow::UpdateKeyword(std::string new_kw){
-	gui->messenger->UpdateKeyword(new_kw);
-
-}
-
-void GameWindow::SpoilerWarning() {
-	QMessageBox::critical(nullptr, "Warning!", "You can't use a guessing word.");
-}
-
-void GameWindow::ShowWarning(){
-	emit Warning();
-}
-
 
 void GameWindow::on_pushButton_clicked()
 {

@@ -34,7 +34,6 @@ Request Client::parse(std::string req_data) {
 		for (int i = 3; i < request_arr.size(); ++i) {
 			team_players.push_back(request_arr[i]);
 		}
-		is_host_ = (team_players[0] == user_login_);
 		host_login = team_players[0];
 		if (num_teams_>1){
 			for(int i=1; i<=num_teams_; ++i){
@@ -82,7 +81,12 @@ Request Client::parse(std::string req_data) {
 
 	}
 	if (request.method == "round") {
-		request.parameters["game_id"] = request_arr[1];
+		host_login = request_arr[1];
+		if(num_teams_==1){
+			for(int i=0; i<leaderboard_.size; ++i){
+				leaderboard_.leaders[i].host = (leaderboard_.leaders[i].name == host_login);
+			}
+		}
 	}
 	if (request.method == "auth") {
 		request.parameters["status"] = request_arr[1];
@@ -114,7 +118,7 @@ std::string Client::serialize_settings(GameConfig settings) {
 }
 
 std::string Client::serialize_msg(Message msg) {
-	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" + (is_host_ ? "host" : "not_host");
+	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" + (user_login_ == host_login ? "host" : "not_host");
 }
 
 std::string Client::serialize_round() {
@@ -215,7 +219,9 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "round") {
-
+			w->configWindow->gameWindow->UpdateLeaderboard(leaderboard_);
+			w->configWindow->gameWindow->NewRound();
+			handle_write(err);
 		}
 
 		if (request.method == "game_over") {

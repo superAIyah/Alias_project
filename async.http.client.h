@@ -93,7 +93,6 @@ private:
 	int round_duration;
 	LeaderBoard leaderboard_;
 	std::string host_login;
-	bool is_host_;
 
 	int num_teams_;
 
