@@ -63,8 +63,6 @@ public:
 
 	void handle_multiwrite(const boost::system::error_code &e);
 
-	void run();
-
 	int RoundDuration(){return round_duration;}
 
 private:
@@ -99,8 +97,6 @@ private:
 
 	int num_teams_;
 
-
-	std::vector<boost::shared_ptr<std::thread>> threads;
 	/// The io_context used to perform asynchronous operations.
 	boost::asio::io_context io_context_;
 

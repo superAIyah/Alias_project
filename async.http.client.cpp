@@ -261,20 +261,6 @@ void Client::handle_multiwrite(const boost::system::error_code &e) {
 	}
 }
 
-void Client::run() {
-//	boost::shared_ptr<std::thread> newthread(new std::thread(
-//			boost::bind(&boost::asio::io_context::run, &io_context_)));
-//	threads.push_back(newthread);
-//
-//	threads[0]->join();
-
-//	QThread* newthread = new QThread;
-//	this->moveToThread(newthread);
-//	io_context_.run();
-//	newthread->start();
-}
-
-
 int main(int argc, char *argv[]) {
 	try {
 		if (argc != 3) {
@@ -295,25 +281,11 @@ int main(int argc, char *argv[]) {
 
 		Client c(io_context, argv[1], argv[2], thread);
 
-//		boost::shared_ptr<std::thread> newthread(new std::thread(
-//				boost::bind(&boost::asio::io_context::run, &io_context)));
-//		std::vector<boost::shared_ptr<std::thread>> threads;
-//
-//		threads.push_back(newthread);
-
-
-
 		QObject::connect(thread, SIGNAL(started()), worker, SLOT(process()));
-//		connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
-
-//		a.exec();
 
 		thread->start();
+
 		a.exec();
-
-//		threads[0]->join();
-//		c.run();
-
 
 	}
 	catch (std::exception &e) {
