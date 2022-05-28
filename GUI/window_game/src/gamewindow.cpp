@@ -13,6 +13,7 @@ GameWindow::GameWindow(Client* cl, QWidget *parent) :
     gui = new ClientInterface(timeController, msg_browser, board);
     connect(timeController->timer, SIGNAL(timeout()), this, SLOT(TimerSlot()));
 	connect(this, SIGNAL(Show()), this, SLOT(TimerStart()));
+	connect(this, SIGNAL(Warning()), this, SLOT(SpoilerWarning()));
 }
 
 void GameWindow::ShowWindow(){
@@ -56,8 +57,13 @@ void GameWindow::UpdateKeyword(std::string new_kw){
 	gui->messenger->UpdateKeyword(new_kw);
 
 }
-void GameWindow::spoiler_warning() {
-	QMessageBox::critical(this, "Warning!", "You can't use a guessing word.");
+
+void GameWindow::SpoilerWarning() {
+	QMessageBox::critical(nullptr, "Warning!", "You can't use a guessing word.");
+}
+
+void GameWindow::ShowWarning(){
+	emit Warning();
 }
 
 

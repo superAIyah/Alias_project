@@ -154,8 +154,7 @@ void Client::send_round() {
 	                                     boost::asio::placeholders::error));
 }
 
-void Client::handle_resolve(const boost::system::error_code &err,
-                            const tcp::resolver::results_type &endpoints) {
+void Client::handle_resolve(const boost::system::error_code &err, const tcp::resolver::results_type &endpoints) {
 	if (!err) {
 		// Attempt a Client to each endpoint in the list until we
 		// successfully establish a Client.
@@ -229,7 +228,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "warning") {
-			w->configWindow->gameWindow->spoiler_warning();
+			w->configWindow->gameWindow->ShowWarning();
 			handle_write(err);
 		}
 	}

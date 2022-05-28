@@ -32,18 +32,20 @@ public:
 	void UpdateMessages(const Message& new_msg);
 	void UpdateLeaderboard(const LeaderBoard& lb);
 	void UpdateKeyword(std::string new_kw);
-	void spoiler_warning();
 	void ShowWindow();
+	void ShowWarning();
 
 
 private slots:
     void on_pushButton_clicked();
     void TimerSlot();
 	void TimerStart();
+	void SpoilerWarning();
 
 public slots:
 signals:
 	void Show();
+	void Warning();
 private:
     Ui::GameWindow *ui;
 	Client* client_;
