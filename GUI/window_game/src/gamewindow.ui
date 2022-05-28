@@ -83,7 +83,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Слово: Apple</string>
+        <string>Guess the word!</string>
        </property>
       </widget>
      </item>

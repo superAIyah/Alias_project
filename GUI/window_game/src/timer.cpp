@@ -2,7 +2,7 @@
 
 Timer::Timer(QLabel* ui_label)
 {
-    timer = new QTimer();
+    timer = new QTimer(0);
     label = ui_label;
 }
 

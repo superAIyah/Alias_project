@@ -2,6 +2,12 @@
 
 using boost::asio::ip::tcp;
 
+
+void Worker::process() {
+//	app_->exec();
+	io_context_->run();
+}
+
 Request Client::parse(std::string req_data) {
 	Request request;
 	std::vector<std::string> request_arr;
@@ -10,24 +16,13 @@ Request Client::parse(std::string req_data) {
 //	boost::split(request_arr, req_data, [](char c) { return c == ':'; });
 
 //  for deploy
-//	std::regex rx("[^\\s]+\r\n");
-//	std::sregex_iterator re_it(req_data.begin(), req_data.end(), rx), rxend;
-//
-//	while(re_it != rxend)
-//	{
-//		request_arr.push_back(re_it->str());
-//		++re_it;
-//	}
-
 	size_t pos = 0;
 	std::string token;
 	while ((pos = req_data.find("\r\n")) != std::string::npos) {
 		token = req_data.substr(0, pos);
-//		std::cout << token << std::endl;
 		request_arr.push_back(token);
 		req_data.erase(0, pos + 2);
 	}
-//	request_arr.push_back(req_data);
 
 
 	request.method = request_arr[0];
@@ -52,7 +47,6 @@ Request Client::parse(std::string req_data) {
 			}
 		}
 		leaderboard_.size = leaderboard_.leaders.size();
-//		std::cout<<leaderboard_.size;
 	}
 	if (request.method == "keyword") {
 		request.parameters["new_keyword"] = request_arr[1];
@@ -98,8 +92,8 @@ Request Client::parse(std::string req_data) {
 }
 
 
-Client::Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_) :
-		resolver_(io_context), socket_(io_context), server(server_), port(port_) {
+Client::Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread* thread) :
+		resolver_(io_context), socket_(io_context), server(server_), port(port_), thread_(thread) {
 	w = new MainWindow(this);
 	w->show();
 	// Start an asynchronous resolve to translate the server and service names
@@ -192,12 +186,14 @@ void Client::handle_read(const boost::system::error_code &err) {
 			}
 			else if (request.parameters["status"] == "already_online") {
 				//  Вызываем функцию ФЕДИ! (для вывода ошибки)
+				handle_write(err);
 			}
 		}
 
 		if (request.method == "settings") {
 			w->configWindow->next_window();
 			w->configWindow->gameWindow->UpdateLeaderboard(leaderboard_);
+//			w->configWindow->gameWindow->timeController->timer->moveToThread(thread_);
 			handle_write(err);
 		}
 
@@ -292,17 +288,29 @@ int main(int argc, char *argv[]) {
 
 		boost::asio::io_context io_context;
 
-		Client c(io_context, argv[1], argv[2]);
+		QThread* thread = new QThread;
+		Worker* worker = new Worker(io_context, &a);
+		worker->moveToThread(thread);
 
-		boost::shared_ptr<std::thread> newthread(new std::thread(
-				boost::bind(&boost::asio::io_context::run, &io_context)));
-		std::vector<boost::shared_ptr<std::thread>> threads;
+		Client c(io_context, argv[1], argv[2], thread);
 
-		threads.push_back(newthread);
+//		boost::shared_ptr<std::thread> newthread(new std::thread(
+//				boost::bind(&boost::asio::io_context::run, &io_context)));
+//		std::vector<boost::shared_ptr<std::thread>> threads;
+//
+//		threads.push_back(newthread);
 
+
+
+		QObject::connect(thread, SIGNAL(started()), worker, SLOT(process()));
+//		connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
+
+//		a.exec();
+
+		thread->start();
 		a.exec();
 
-		threads[0]->join();
+//		threads[0]->join();
 //		c.run();
 
 

@@ -12,8 +12,25 @@ GameWindow::GameWindow(Client* cl, QWidget *parent) :
 
     gui = new ClientInterface(timeController, msg_browser, board);
     connect(timeController->timer, SIGNAL(timeout()), this, SLOT(TimerSlot()));
+	connect(this, SIGNAL(Show()), this, SLOT(TimerStart()));
 
+//	timeController->start();
+}
 
+void GameWindow::ShowWindow(){
+	show();
+	emit Show();
+}
+
+void GameWindow::TimerStart(){
+	timeController->start(client_.);
+}
+
+void GameWindow::CreateTimer(){
+	timeController = new Timer(ui->labelTime); // создание таймера
+	gui = new ClientInterface(timeController, msg_browser, board);
+	connect(timeController->timer, SIGNAL(timeout()), this, SLOT(TimerSlot()));
+	timeController->start();
 }
 
 GameWindow::~GameWindow()

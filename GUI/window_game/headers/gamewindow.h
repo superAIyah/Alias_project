@@ -23,6 +23,7 @@ class GameWindow : public QDialog
 
 public:
     explicit GameWindow(Client* cl, QWidget *parent = nullptr);
+	void CreateTimer();
     ~GameWindow();
     Timer *timeController;
     Board *board;
@@ -33,10 +34,17 @@ public:
 	void UpdateLeaderboard(const LeaderBoard& lb);
 	void UpdateKeyword(std::string new_kw);
 	void spoiler_warning();
+	void ShowWindow();
+
 
 private slots:
     void on_pushButton_clicked();
     void TimerSlot();
+	void TimerStart();
+
+public slots:
+signals:
+	void Show();
 private:
     Ui::GameWindow *ui;
 	Client* client_;

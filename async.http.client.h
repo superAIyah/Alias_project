@@ -26,11 +26,25 @@ class Client;
 
 using boost::asio::ip::tcp;
 
+class Worker : public QObject {
+Q_OBJECT
+
+private:
+	boost::asio::io_context* io_context_;
+	QApplication* app_;
+
+public:
+	Worker(boost::asio::io_context &io_context, QApplication* app) : io_context_(&io_context), app_(app) {}
+	~Worker() = default;
+
+public slots:
+	void process();
+};
 
 class Client : QObject {
 //	Q_OBJECT
 public:
-	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_);
+	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread* thread);
 
 	void send_auth(std::string user_login);
 
@@ -76,6 +90,7 @@ private:
 	int game_id_;
 	int team_id_;
 	std::vector<std::string> team_players;
+	int round_duration;
 	LeaderBoard leaderboard_;
 	std::string host_login;
 	bool is_host_;
@@ -89,6 +104,8 @@ private:
 
 	std::string server;
 	std::string port;
+
+	QThread* thread_;
 };
 
 #endif //ALIAS_ASYNC_HTTP_CLIENT_H

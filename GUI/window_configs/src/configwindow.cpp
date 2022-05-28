@@ -54,6 +54,8 @@ void ConfigWindow::on_findGameButton_clicked()
 }
 
 void ConfigWindow::next_window(){
-	gameWindow->show();
+//	gameWindow->CreateTimer();
+	gameWindow->ShowWindow();
+//	gameWindow->timeController->start();
     this->hide();
 }

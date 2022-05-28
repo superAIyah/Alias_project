@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.18.4)
 project(Alias)
 
+find_package(Qt5 COMPONENTS Widgets)
+
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
