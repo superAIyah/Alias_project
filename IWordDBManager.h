@@ -14,6 +14,8 @@ public:
 //получение пользователя по id
     virtual std::vector<Word> get_words(int lvl, int num) = 0;
 
+    virtual std::vector<std::string> get_words_str(int lvl, int num) = 0;
+
 //сброс таблицы (системное)
     virtual void drop() = 0;
 };

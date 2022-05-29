@@ -65,7 +65,7 @@ DBConnection &ConnectionProxy::operator*() { return *m_connection; }
 
 bool ConnectionProxy::valid() const {
     if ((m_pool != nullptr) && (m_connection != nullptr)) {
-        std::unique_lock lock{m_pool->m_connections_mtx};
+        std::unique_lock<std::mutex> lock{m_pool->m_connections_mtx};
         return m_pool->m_connections_busy.count(m_connection) > 0;
     }
 

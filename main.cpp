@@ -34,17 +34,20 @@ void premade(IUserDBManager& user_manager, IWordDBManager& word_manager, Connect
     assert(users[2].login == "DDD");
     std::cout<<"4 done\n";
 
+	UserInfo tmp = user_manager.GetInfo("CCC");
+	user_manager.UpdateUser("BBB", false);
 
-    word_manager.add_word(Word("яблоко", "яблок", 1));
-    word_manager.add_word(Word("мышь", "мыш", 1));
-    word_manager.add_word(Word("табуретка", "табурет", 2));
-    word_manager.add_word(Word("капельница", "кап", 2));
-    std::vector<Word> words = word_manager.get_words(1, 2);
-    assert((words[0].word == "яблоко" && words[1].stem == "мыш") || (words[1].word == "яблоко" && words[0].stem == "мыш"));
-    std::cout<<"5 done\n";
-    words = word_manager.get_words(2, 2);
-    assert((words[0].word == "табуретка" && words[1].stem == "кап") || (words[1].word == "табуретка" && words[0].stem == "кап"));
-    std::cout<<"6 done\n";
+
+//    word_manager.add_word(Word("яблоко", "яблок", 1));
+//    word_manager.add_word(Word("мышь", "мыш", 1));
+//    word_manager.add_word(Word("табуретка", "табурет", 2));
+//    word_manager.add_word(Word("капельница", "кап", 2));
+//    std::vector<Word> words = word_manager.get_words(1, 2);
+//    assert((words[0].word == "яблоко" && words[1].stem == "мыш") || (words[1].word == "яблоко" && words[0].stem == "мыш"));
+//    std::cout<<"5 done\n";
+//    words = word_manager.get_words(2, 2);
+//    assert((words[0].word == "табуретка" && words[1].stem == "кап") || (words[1].word == "табуретка" && words[0].stem == "кап"));
+//    std::cout<<"6 done\n";
 }
 
 class testclass{

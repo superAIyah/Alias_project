@@ -18,6 +18,8 @@ public:
 
     std::vector<Word> get_words(int lvl, int num) override;
 
+    std::vector<std::string> get_words_str(int lvl, int num) override;
+
     void drop() override { session->sql("DROP TABLE words;").execute(); }
 };
 

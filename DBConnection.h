@@ -5,6 +5,7 @@
 #include <vector>
 #include <mutex>
 #include "tables.h"
+#include <unordered_map>
 
 // переменные подключения
 //const std::string HOST = "localhost";
