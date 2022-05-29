@@ -230,7 +230,8 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "game_over") {
-
+			w->configWindow->gameWindow->ShowConfig();
+			handle_write(err);
 		}
 
 		if (request.method == "keyword") {

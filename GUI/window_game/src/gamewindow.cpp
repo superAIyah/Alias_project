@@ -17,6 +17,7 @@ GameWindow::GameWindow(Client *cl, ConfigWindow* prev_window, QWidget *parent) :
 	connect(this, SIGNAL(SigUpdateMessages()), this, SLOT(SlotUpdateMessages()));
 	connect(this, SIGNAL(SigUpdateKeyword()), this, SLOT(SlotUpdateKeyword()));
 	connect(this, SIGNAL(SigUpdateLeaderboard()), this, SLOT(SlotUpdateLeaderboard()));
+	connect(this, SIGNAL(SigShowConfig()), this, SLOT(SlotShowConfig()));
 
 }
 
@@ -56,6 +57,10 @@ void GameWindow::UpdateKeyword(std::string new_kw) {
 	emit SigUpdateKeyword();
 }
 
+void GameWindow::ShowConfig() {
+	emit SigShowConfig();
+}
+
 void GameWindow::SlotTimerStart() {
     gui->messenger->UpdateKeyword("Guess the word!");
 	timeController->start(client_->RoundDuration());
@@ -92,7 +97,7 @@ void GameWindow::on_pushButton_clicked() {
     ui->lineEdit->setText("");
 }
 
-void GameWindow::showConfig() {
+void GameWindow::SlotShowConfig() {
     window_config->show();
     this->hide();
 }

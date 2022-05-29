@@ -45,6 +45,8 @@ public:
 
 	void NewRound();
 
+	void ShowConfig();
+
 
 private slots:
 
@@ -62,6 +64,8 @@ private slots:
 
 	void SlotUpdateKeyword();
 
+	void SlotShowConfig();
+
 //public slots:
 signals:
 
@@ -75,8 +79,9 @@ signals:
 
 	void SigUpdateKeyword();
 
+	void SigShowConfig();
+
 private:
-    void showConfig();
 
     ConfigWindow *window_config;
 	Ui::GameWindow *ui;
