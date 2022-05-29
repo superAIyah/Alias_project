@@ -14,6 +14,10 @@ auth:user_login:
 
 auth:[ok/already_online]:
 
+#### затем:
+
+user_info:num_of_wins:num_of_losses:player_rating:
+
 ## Для поиска игры:
 
 ### на сервер:
@@ -69,3 +73,7 @@ keyword:new_keyword:
 ### от сервера, конец игры:
 
 game_over:
+
+#### затем:
+
+user_info:num_of_wins:num_of_losses:player_rating:

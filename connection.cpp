@@ -19,11 +19,10 @@ Request parse(std::string req_data) {
 
 	size_t pos = 0;
 	std::string token;
-	while ((pos = req_data.find(":")) != std::string::npos) {
+	while ((pos = req_data.find("\r\n")) != std::string::npos) {
 		token = req_data.substr(0, pos);
-//		std::cout << token << std::endl;
 		request_arr.push_back(token);
-		req_data.erase(0, pos + 1);
+		req_data.erase(0, pos + 2);
 	}
 	//request_arr.push_back(req_data);
 
