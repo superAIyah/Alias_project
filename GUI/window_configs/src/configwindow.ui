@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>892</width>
-    <height>476</height>
+    <width>1008</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QGroupBox" name="BoxMode">
+      <widget class="QGroupBox" name="BoxLevel">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -33,7 +33,7 @@
        <property name="title">
         <string>Уровень сложности</string>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>13</x>
@@ -69,6 +69,39 @@
       </widget>
      </item>
      <item>
+      <widget class="QGroupBox" name="BoxMode">
+       <property name="title">
+        <string>Режим игры</string>
+       </property>
+       <widget class="QWidget" name="layoutWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>161</width>
+          <height>121</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QRadioButton" name="e1">
+           <property name="text">
+            <string>одиночный</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="e2">
+           <property name="text">
+            <string>командный</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item>
       <widget class="QGroupBox" name="BoxTeamCnt">
        <property name="minimumSize">
         <size>
@@ -83,25 +116,18 @@
         </size>
        </property>
        <property name="title">
-        <string>Игроков в команде</string>
+        <string>Количество команд</string>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>13</x>
           <y>33</y>
-          <width>191</width>
-          <height>121</height>
+          <width>161</width>
+          <height>141</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QRadioButton" name="b1">
-           <property name="text">
-            <string>1</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QRadioButton" name="b2">
            <property name="text">
@@ -149,15 +175,15 @@
         </size>
        </property>
        <property name="title">
-        <string>Количество команд</string>
+        <string>Игроков в команде</string>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
-          <x>13</x>
-          <y>33</y>
-          <width>191</width>
-          <height>121</height>
+          <x>11</x>
+          <y>31</y>
+          <width>161</width>
+          <height>141</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
@@ -210,7 +236,7 @@
        <property name="title">
         <string>Длина раунда (сек)</string>
        </property>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>13</x>

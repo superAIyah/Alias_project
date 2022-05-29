@@ -26,6 +26,8 @@ public:
 
 private slots:
     void on_findGameButton_clicked();
+	void on_e1_clicked();
+	void on_e2_clicked();
 
 private:
     Ui::ConfigWindow *ui;
