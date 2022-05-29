@@ -56,6 +56,7 @@ void GameWindow::UpdateKeyword(std::string new_kw) {
 }
 
 void GameWindow::SlotTimerStart() {
+    gui->messenger->UpdateKeyword("Guess the word!");
 	timeController->start(client_->RoundDuration());
 }
 

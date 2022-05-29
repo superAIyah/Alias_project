@@ -9,9 +9,9 @@ public:
     GameConfig(std::string sep = "\r\n");
     void AddSetting(std::string);
     std::string GetSettings();
+    int size;
 private:
     std::string separator;
-    int size;
     std::string settings;
 
 };

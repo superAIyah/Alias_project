@@ -10,9 +10,10 @@ void GameConfig::AddSetting(std::string new_setting) {
 //        settings += separator;
 //        settings += new_setting;
 //    }
-	settings += new_setting;
-	settings += separator;
-    size++;
+    settings += new_setting;
+    settings += separator;
+    if (new_setting != "")
+        size++;
 }
 
 std::string GameConfig::GetSettings() {
