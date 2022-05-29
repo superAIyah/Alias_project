@@ -17,5 +17,6 @@ set(GAME_INCLUDE_DIRS ${INCLUDE_DIRS} PARENT_SCOPE)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "....") # для инклудов между заголовочными файлами
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRS}) # для инклудов между заголовочными файлами
+target_include_directories(${PROJECT_NAME} PUBLIC "../window_configs/headers") # окно авторизации вызывает окно configs
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets) # подключаем QT в эту библиотеку

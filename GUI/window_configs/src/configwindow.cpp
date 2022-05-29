@@ -14,7 +14,7 @@ ConfigWindow::ConfigWindow(Client* cl, QWidget *parent) :
     ui(new Ui::ConfigWindow), client_(cl)
 {
     ui->setupUi(this);
-    gameWindow = new GameWindow(cl);
+    gameWindow = new GameWindow(cl, this);
 }
 
 ConfigWindow::~ConfigWindow()
@@ -72,15 +72,17 @@ void ConfigWindow::on_findGameButton_clicked()
 	lbl->resize(200, 200);
 	lbl->show();
 	lbl->setAlignment(Qt::AlignCenter);
-	movie->start();
+    movie->start();
+    //movie->stop();
 	//qDebug() << "abc" << "def";
 //    std::string  path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
 //    qDebug() << path.c_str();
-	// <-- вызов функции поиска игры клиента  -->
+    // <-- вызов функции поиска игры клиента  -->
 	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
 
 void ConfigWindow::next_window(){
+    ui->labelGIF->hide();
 	gameWindow->ShowWindow();
     this->hide();
 }

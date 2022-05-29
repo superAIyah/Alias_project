@@ -87,7 +87,6 @@ void GameWindow::SlotTimerIt() {
 }
 
 void GameWindow::on_pushButton_clicked() {
-    showConfig();
 	std::string input_text = ui->lineEdit->text().toStdString();
 	client_->send_msg(input_text);
     ui->lineEdit->setText("");

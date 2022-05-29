@@ -7,6 +7,7 @@
 #include "board.h"
 #include "messenger.h"
 #include "clientinterface.h"
+#include "configwindow.h"
 
 class GameWindow;
 
@@ -21,7 +22,7 @@ class GameWindow : public QDialog {
 Q_OBJECT
 
 public:
-	explicit GameWindow(Client *cl, QWidget *parent = nullptr);
+    explicit GameWindow(Client *cl, ConfigWindow*, QWidget *parent = nullptr);
 
 	~GameWindow();
 
@@ -75,6 +76,9 @@ signals:
 	void SigUpdateKeyword();
 
 private:
+    void showConfig();
+
+    ConfigWindow *window_config;
 	Ui::GameWindow *ui;
 	Client *client_;
 	std::string keyword;
