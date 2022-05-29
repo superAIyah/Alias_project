@@ -36,7 +36,7 @@ Request parse(std::string req_data) {
 		request_arr.push_back(token);
 		req_data.erase(0, pos + 2);
 	}
-	request_arr.push_back(req_data);
+//	request_arr.push_back(req_data);
 
 
 	request.method = request_arr[0];
