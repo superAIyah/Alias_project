@@ -18,6 +18,17 @@ class Connection;
 #include "async.http.server.h"
 
 
+struct information
+{
+	int game_id;
+	int team_id;
+	std::string login;
+	std::string text;
+	std::string str;
+};
+
+
+
 class Connection
 		: public boost::enable_shared_from_this<Connection>,
 		  private boost::noncopyable {
@@ -46,6 +57,24 @@ private:
 
 	void send_kw_2_host(int game_id_, int team_id_);
 
+	void authorization(Request request);
+	void already_online();
+	void not_online(std::string user_login);
+	void new_client(std::string user_login);
+
+
+	void settings(Request request, const boost::system::error_code &e);
+
+
+	void msg(Request request, const boost::system::error_code &e);
+	std::string text_msg(information info);
+	void is_host(information info,const boost::system::error_code &e);
+	void is_not_host(information info, const boost::system::error_code &e);
+	std::string guess_msg(information info);
+
+
+	void round(Request request, const boost::system::error_code &e);
+	void update_hosts(int game_id);
 private:
 	/// Strand to ensure the connection's handlers are not called concurrently.
 	boost::asio::strand<boost::asio::io_context::executor_type> strand_;
