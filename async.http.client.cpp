@@ -118,11 +118,11 @@ std::string Client::serialize_settings(GameConfig settings) {
 }
 
 std::string Client::serialize_msg(Message msg) {
-	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" + (user_login_ == host_login ? "host" : "not_host");
+        return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" + (user_login_ == host_login ? "host" : "not_host") + "\r\n";
 }
 
 std::string Client::serialize_round() {
-	return "round\r\n" + std::to_string(game_id_);
+        return "round\r\n" + std::to_string(game_id_) + "\r\n";
 }
 
 void Client::send_auth(std::string user_login) {

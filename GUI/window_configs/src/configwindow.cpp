@@ -5,6 +5,9 @@
 
 #include <iostream>
 #include <QDebug>
+#include <QDir>
+#include <QMovie>
+#include <QMessageBox>
 
 ConfigWindow::ConfigWindow(Client* cl, QWidget *parent) :
     QDialog(parent),
@@ -21,8 +24,6 @@ ConfigWindow::~ConfigWindow()
 
 void ConfigWindow::on_findGameButton_clicked()
 {
-    //ui->BoxMode->setVisible(!ui->BoxMode->isVisible());
-
     //Получаем все RadioButtons у каждого типа настройки
 	QList<QRadioButton *> game_mode = ui->BoxMode->findChildren<QRadioButton *>(); // уровень сложности
 	QList<QRadioButton *> length_radios = ui->BoxLength->findChildren<QRadioButton *>(); // длина раунда
@@ -37,13 +38,29 @@ void ConfigWindow::on_findGameButton_clicked()
 
 	// Список со всеми настройками (Полиморфизм)
 	std::vector<ISetting *> configs = {&mode, &team_sz, &team_cnt, &round};
+    int settings_cnt = configs.size();
 
     // Создаем класс, собирающий все настройки воедино
     GameBuilder configs_builder(configs);
     GameConfig game_config;
     game_config = configs_builder.CollectSettings();
     qDebug() << game_config.GetSettings().c_str();
+    if (game_config.size != settings_cnt) {
+        QMessageBox::critical(this, "Ошибка", "Выберите все настройки");
+        return;
+    }
 
+    QLabel *lbl = ui->labelGIF; // запуск гифки поиска игры
+    std::string gif_path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
+    QMovie *movie = new QMovie(QString::fromStdString(gif_path));
+    lbl->setMovie(movie);
+    lbl->resize(200, 200);
+    lbl->show();
+    lbl->setAlignment(Qt::AlignCenter);
+    movie->start();
+    //qDebug() << "abc" << "def";
+//    std::string  path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
+//    qDebug() << path.c_str();
     // <-- вызов функции поиска игры клиента  -->
 	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
