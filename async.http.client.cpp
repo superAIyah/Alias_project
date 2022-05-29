@@ -35,14 +35,14 @@ Request Client::parse(std::string req_data) {
 			team_players.push_back(request_arr[i]);
 		}
 		host_login = team_players[0];
-		if (num_teams_>1){
-			for(int i=1; i<=num_teams_; ++i){
-				leaderboard_.leaders.push_back(Leader("Team "+std::to_string(i), 0, false));
+		if (num_teams_ > 1) {
+			for (int i = 1; i <= num_teams_; ++i) {
+				leaderboard_.leaders.push_back(Leader("Team " + std::to_string(i), 0, false));
 			}
 		}
 		else {
-			for(int i=0; i<team_players.size(); ++i){
-				leaderboard_.leaders.push_back(Leader(team_players[i], 0, (i==0)));
+			for (int i = 0; i < team_players.size(); ++i) {
+				leaderboard_.leaders.push_back(Leader(team_players[i], 0, (i == 0)));
 			}
 		}
 		leaderboard_.size = leaderboard_.leaders.size();
@@ -64,16 +64,16 @@ Request Client::parse(std::string req_data) {
 
 		int host_pts = std::stoi(request_arr[5]);
 
-		if(num_teams_>1){
-			leaderboard_.leaders[std::stoi(request.parameters["team_id"])-1].points += host_pts;
+		if (num_teams_ > 1) {
+			leaderboard_.leaders[std::stoi(request.parameters["team_id"]) - 1].points += host_pts;
 		}
 		else {
 			int user_pts = std::stoi(request_arr[4]);
-			for(int i=0; i<leaderboard_.size; ++i){
-				if(leaderboard_.leaders[i].name == request.parameters["user_login"]){
+			for (int i = 0; i < leaderboard_.size; ++i) {
+				if (leaderboard_.leaders[i].name == request.parameters["user_login"]) {
 					leaderboard_.leaders[i].points += user_pts;
 				}
-				if(leaderboard_.leaders[i].host){
+				if (leaderboard_.leaders[i].host) {
 					leaderboard_.leaders[i].points += host_pts;
 				}
 			}
@@ -82,8 +82,8 @@ Request Client::parse(std::string req_data) {
 	}
 	if (request.method == "round") {
 		host_login = request_arr[1];
-		if(num_teams_==1){
-			for(int i=0; i<leaderboard_.size; ++i){
+		if (num_teams_ == 1) {
+			for (int i = 0; i < leaderboard_.size; ++i) {
 				leaderboard_.leaders[i].host = (leaderboard_.leaders[i].name == host_login);
 			}
 		}
@@ -96,7 +96,7 @@ Request Client::parse(std::string req_data) {
 }
 
 
-Client::Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread* thread) :
+Client::Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread *thread) :
 		resolver_(io_context), socket_(io_context), server(server_), port(port_), thread_(thread) {
 	w = new MainWindow(this);
 	w->show();
@@ -118,11 +118,12 @@ std::string Client::serialize_settings(GameConfig settings) {
 }
 
 std::string Client::serialize_msg(Message msg) {
-	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" + (user_login_ == host_login ? "host" : "not_host");
+	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" +
+			(user_login_ == host_login ? "host" : "not_host") + "\r\n";
 }
 
 std::string Client::serialize_round() {
-	return "round\r\n" + std::to_string(game_id_);
+	return "round\r\n" + std::to_string(game_id_) + "\r\n";
 }
 
 void Client::send_auth(std::string user_login) {
@@ -209,7 +210,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "guess") {
-			if(std::stoi(request.parameters["team_id"]) == team_id_) {
+			if (std::stoi(request.parameters["team_id"]) == team_id_) {
 				w->configWindow->gameWindow->UpdateMessages(Message(request.parameters["user_login"],
 				                                                    (request.parameters["user_login"] == user_login_),
 				                                                    request.parameters["text"]));
@@ -280,8 +281,8 @@ int main(int argc, char *argv[]) {
 
 		boost::asio::io_context io_context;
 
-		QThread* thread = new QThread;
-		Worker* worker = new Worker(io_context, &a);
+		QThread *thread = new QThread;
+		Worker *worker = new Worker(io_context, &a);
 		worker->moveToThread(thread);
 
 		Client c(io_context, argv[1], argv[2], thread);

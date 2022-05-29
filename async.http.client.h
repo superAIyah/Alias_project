@@ -1,5 +1,6 @@
 #ifndef ALIAS_ASYNC_HTTP_CLIENT_H
 #define ALIAS_ASYNC_HTTP_CLIENT_H
+
 #include <iostream>
 #include <istream>
 #include <ostream>
@@ -30,21 +31,23 @@ class Worker : public QObject {
 Q_OBJECT
 
 private:
-	boost::asio::io_context* io_context_;
-	QApplication* app_;
+	boost::asio::io_context *io_context_;
+	QApplication *app_;
 
 public:
-	Worker(boost::asio::io_context &io_context, QApplication* app) : io_context_(&io_context), app_(app) {}
+	Worker(boost::asio::io_context &io_context, QApplication *app) : io_context_(&io_context), app_(app) {}
+
 	~Worker() = default;
 
 public slots:
+
 	void process();
 };
 
 class Client : QObject {
 //	Q_OBJECT
 public:
-	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread* thread);
+	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread *thread);
 
 	void send_auth(std::string user_login);
 
@@ -63,7 +66,7 @@ public:
 
 	void handle_multiwrite(const boost::system::error_code &e);
 
-	int RoundDuration(){return round_duration;}
+	int RoundDuration() { return round_duration; }
 
 private:
 	Request parse(std::string req_data);
@@ -102,7 +105,7 @@ private:
 	std::string server;
 	std::string port;
 
-	QThread* thread_;
+	QThread *thread_;
 };
 
 #endif //ALIAS_ASYNC_HTTP_CLIENT_H
