@@ -153,10 +153,13 @@ void Client::send_msg(std::string text) {
 }
 
 void Client::send_round() {
-	std::string str = serialize_round();
-	boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
-	                         boost::bind(&Client::handle_multiwrite, this,
-	                                     boost::asio::placeholders::error));
+	if(!sent_round) {
+		sent_round = true;
+		std::string str = serialize_round();
+		boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
+		                         boost::bind(&Client::handle_multiwrite, this,
+		                                     boost::asio::placeholders::error));
+	}
 }
 
 void Client::handle_resolve(const boost::system::error_code &err, const tcp::resolver::results_type &endpoints) {
@@ -220,6 +223,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "round") {
+			sent_round = false;
 			w->configWindow->gameWindow->UpdateLeaderboard(leaderboard_);
 			w->configWindow->gameWindow->NewRound();
 			handle_write(err);

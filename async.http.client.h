@@ -96,8 +96,8 @@ private:
 	int round_duration;
 	LeaderBoard leaderboard_;
 	std::string host_login;
-
 	int num_teams_;
+	bool sent_round = false;
 
 	/// The io_context used to perform asynchronous operations.
 	boost::asio::io_context io_context_;

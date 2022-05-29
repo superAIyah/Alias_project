@@ -52,6 +52,7 @@ void ConfigWindow::on_findGameButton_clicked()
 
     QLabel *lbl = ui->labelGIF; // запуск гифки поиска игры
     std::string gif_path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
+//	std::cout << gif_path << std::endl;
     QMovie *movie = new QMovie(QString::fromStdString(gif_path));
     lbl->setMovie(movie);
     lbl->resize(200, 200);
