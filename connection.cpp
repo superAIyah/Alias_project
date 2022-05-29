@@ -19,10 +19,10 @@ Request parse(std::string req_data) {
 
 	size_t pos = 0;
 	std::string token;
-	while ((pos = req_data.find(":")) != std::string::npos) {
+	while ((pos = req_data.find("\r\n")) != std::string::npos) {
 		token = req_data.substr(0, pos);
 		request_arr.push_back(token);
-		req_data.erase(0, pos + 1);
+		req_data.erase(0, pos + 2);
 	}
 	//request_arr.push_back(req_data);
 
@@ -125,6 +125,11 @@ void Connection::not_online(std::string user_login)
 	ss.str(std::string());
 	UserInfo info = Server->UDBM->GetInfo(user_login);
 	ss << "user_info\r\n" << info.num_of_wins << "\r\n" << info.num_of_losses << "\r\n" << info.player_rating << "\r\n";
+	buffer = ss.str();
+	boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
+					boost::bind(&Connection::handle_write, shared_from_this(),
+					boost::asio::placeholders::error));
+
 }
 
 void Connection::new_client(std::string user_login, std::string password)
