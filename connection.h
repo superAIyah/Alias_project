@@ -11,6 +11,7 @@ class Connection;
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <memory>
+#include <algorithm>
 
 #include "response.h"
 #include "request.h"
@@ -60,7 +61,7 @@ private:
 	void authorization(Request request);
 	void already_online();
 	void not_online(std::string user_login);
-	void new_client(std::string user_login);
+	void new_client(std::string user_login, std::string password);
 
 
 	void settings(Request request, const boost::system::error_code &e);
@@ -75,6 +76,12 @@ private:
 
 	void round(Request request, const boost::system::error_code &e);
 	void update_hosts(int game_id);
+
+
+
+	void create_logins_board(std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> team_sockets,int game_id);
+	void create_teams_board(int num_teams, int game_id);
+	void sendDB(int game_id);
 private:
 	/// Strand to ensure the connection's handlers are not called concurrently.
 	boost::asio::strand<boost::asio::io_context::executor_type> strand_;

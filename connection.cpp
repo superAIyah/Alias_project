@@ -19,10 +19,10 @@ Request parse(std::string req_data) {
 
 	size_t pos = 0;
 	std::string token;
-	while ((pos = req_data.find("\r\n")) != std::string::npos) {
+	while ((pos = req_data.find(":")) != std::string::npos) {
 		token = req_data.substr(0, pos);
 		request_arr.push_back(token);
-		req_data.erase(0, pos + 2);
+		req_data.erase(0, pos + 1);
 	}
 	//request_arr.push_back(req_data);
 
@@ -48,6 +48,7 @@ Request parse(std::string req_data) {
 	}
 	if (request.method == "auth") {
 		request.parameters["user_login"] = request_arr[1];
+		request.parameters["password"] = request_arr[2];
 	}
 
 
@@ -118,14 +119,20 @@ void Connection::not_online(std::string user_login)
 	boost::asio::async_write(socket_, boost::asio::buffer(buffer.data(), buffer.size()),
 					boost::bind(&Connection::handle_write, shared_from_this(),
 					boost::asio::placeholders::error));
+
+
+	//user_info:num_of_wins:num_of_losses:player_rating:
+	ss.str(std::string());
+	UserInfo info = Server->UDBM->GetInfo(user_login);
+	ss << "user_info\r\n" << info.num_of_wins << "\r\n" << info.num_of_losses << "\r\n" << info.player_rating << "\r\n";
 }
 
-void Connection::new_client(std::string user_login)
+void Connection::new_client(std::string user_login, std::string password)
 {
 		//запоминаем логин
 		user_login_ = user_login;
 		//добавляем в БД
-		Server->UDBM->add_user(User(user_login));
+		Server->UDBM->add_user(User(user_login, "", password));
 		//добавляем в онлайн
 		Server->players_online[user_login] = {-1, -1};
 
@@ -141,6 +148,7 @@ void Connection::new_client(std::string user_login)
 void  Connection::authorization(Request request)
 {
 	std::string user_login = request.parameters["user_login"];
+	std::string password = request.parameters["password"];
 	//если пользователь есть в БД
 	if (Server->UDBM->has_user(user_login))
 	{
@@ -153,10 +161,21 @@ void  Connection::authorization(Request request)
 	}
 	//если пользователя нет в БД
 	else
-		new_client(user_login);
+		new_client(user_login, password);
 }
 
 
+void Connection::create_teams_board(int num_teams, int game_id)
+{
+	for (int i = 1; i <= num_teams; i++)
+		Server->Games[game_id].leader_board[std::to_string(i)] = 0;
+}
+
+void Connection::create_logins_board(std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> team_sockets, int game_id)
+{
+	for (int i = 0; i < team_sockets.size(); i++)
+		Server->Games[game_id].leader_board[team_sockets[i].second] = 0;
+}
 
 void Connection::settings(Request request, const boost::system::error_code &e)
 {
@@ -205,7 +224,10 @@ void Connection::settings(Request request, const boost::system::error_code &e)
 			//запись id игры и команды в players_online
 			Server->players_online[room[i].second] = {new_game_id, team_id};
 		}
-
+		if (num_teams == 1)
+			create_logins_board(Server->Games[new_game_id].team_sockets[1], new_game_id);
+		else
+			create_teams_board(num_teams, new_game_id);
 
 		//добавление слов
 		for (int i = 1; i <= num_teams; ++i)
@@ -321,6 +343,13 @@ void Connection::is_host(information info, const boost::system::error_code &e)
 
 std::string Connection::guess_msg(information info)
 {
+	if (Server->Games[info.game_id].team_sockets.size() == 1)
+	{
+		Server->Games[info.game_id].leader_board[info.login] += std::stoi(USER_GUESS_POINTS);
+		Server->Games[info.game_id].leader_board[Server->Games[info.game_id].hosts[info.team_id].second] += std::stoi(HOST_GUESS_POINTS);
+	}
+	else
+		Server->Games[info.game_id].leader_board[std::to_string(info.team_id)] += std::stoi(HOST_GUESS_POINTS);
 	std::stringstream ss;
 	ss << "guess\r\n"
 		<< info.login << "\r\n" << info.team_id << "\r\n" << info.text << "\r\n" << USER_GUESS_POINTS << "\r\n"
@@ -434,6 +463,40 @@ std::string round_msg(std::string host_login)
 	return ss.str();
 }
 
+bool cmp(std::pair<std::string, int>& a, std::pair<std::string, int>& b)
+{
+    return a.second >= b.second;
+}
+
+void Connection::sendDB(int game_id)
+{
+	std::map<std::string, int> leader_board = Server->Games[game_id].leader_board;
+    std::vector<std::pair<std::string, int> > leader_board_vec;
+    for (auto& it : leader_board)
+        leader_board_vec.push_back(it);
+	sort(leader_board_vec.begin(), leader_board_vec.end(), cmp);
+	int score = leader_board_vec.begin()->second;
+	if (Server->Games[game_id].team_sockets.size() == 1)
+		for (auto i : leader_board_vec)
+		{
+			if (score == i.second)
+				Server->UDBM->UpdateUser(i.first, true);
+			else
+				Server->UDBM->UpdateUser(i.first, false);
+		}
+	else
+		for (auto i : leader_board_vec)
+		{
+			int team_id = std::stoi(i.first);
+			std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> team_sockets = Server->Games[game_id].team_sockets[team_id];
+			for (auto j : team_sockets)
+				if (score == i.second)
+					Server->UDBM->UpdateUser(i.first, true);
+				else
+					Server->UDBM->UpdateUser(i.first, false);
+		}
+}
+
 void Connection::round(Request request, const boost::system::error_code &e)
 {
 	int game_id = std::stoi(request.parameters["game_id"]);
@@ -497,6 +560,7 @@ void Connection::round(Request request, const boost::system::error_code &e)
 						}
 					}
 
+					sendDB(game_id);
 					//сообщение-ответ
 					std::stringstream ss;
 					ss << "gameover\r\n";
@@ -510,6 +574,8 @@ void Connection::round(Request request, const boost::system::error_code &e)
 						                         boost::bind(&Connection::handle_multiwrite, shared_from_this(),
 						                                     boost::asio::placeholders::error));
 					}
+
+
 
 					//удаляет комнату
 					Server->Games.erase(game_id);
