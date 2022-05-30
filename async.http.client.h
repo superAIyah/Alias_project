@@ -67,6 +67,8 @@ public:
 	void handle_multiwrite(const boost::system::error_code &e);
 
 	int RoundDuration() { return round_duration; }
+	
+	std::string getNick() { return user_login_; }
 
 private:
 	Request parse(std::string req_data);

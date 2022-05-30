@@ -69,12 +69,24 @@ void GameWindow::SlotSpoilerWarning() {
 void GameWindow::SlotUpdateLeaderboard() {
 	gui->board->UpdateLeaderboard(leaderboard);
     Board *board_child = (Board*)(gui->board);
-    board_child->colorNick(client->getNick(), QColor(250, 168, 35));
-    board_child->colorHost(QColor(41, 227, 153));
+    board_child->colorNick(client->getNick(), QColor(250, 168, 35)); // покраска участника
+    board_child->colorHost(QColor(41, 227, 153)); // покраска хоста
 }
 
 void GameWindow::SlotUpdateMessages() {
 	std::vector<Message> msgs({last_msg});
+
+    Board *board_child = (Board*)(gui->board); // покраска сообщений хоста
+    std::string color_host_pref = "<span style='color: #29e399'>";
+    std::string color_host_suf = "</span>";
+    std::string host_name = board_child->getHost();
+    for (int i = 0; i < msgs.size(); i++) {
+        Message sms = msgs[i];
+        if (sms.me) continue;
+        if (sms.name == host_name)
+            msgs[i].msg = color_host_pref + sms.msg + color_host_suf;
+    }
+
 	gui->messenger->ShowMessages(msgs);
 }
 
