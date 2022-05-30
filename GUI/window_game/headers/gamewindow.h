@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include <string>
 #include "timer.h"
 #include "board.h"
 #include "messenger.h"

@@ -67,6 +67,10 @@ void GameWindow::SlotSpoilerWarning() {
 }
 
 void GameWindow::SlotUpdateLeaderboard() {
+    std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Word</span>";
+    Message msg(new_word, 0, "");
+    gui->messenger->ShowMessages({msg}); // показать в чат всем, что слово обновилось
+
 	gui->board->UpdateLeaderboard(leaderboard);
     Board *board_child = (Board*)(gui->board);
     board_child->colorNick(client->getNick(), QColor(250, 168, 35)); // покраска участника
