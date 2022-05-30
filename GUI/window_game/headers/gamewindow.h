@@ -78,6 +78,7 @@ signals:
 private:
     void showConfig();
 
+    Client* client;
     ConfigWindow *window_config;
 	Ui::GameWindow *ui;
 	Client *client_;

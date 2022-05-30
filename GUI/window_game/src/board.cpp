@@ -42,3 +42,16 @@ unsigned int Board::UpdateLeaderboard(LeaderBoard lb) {
     }
     return 0; // все OK
 }
+
+void Board::colorNick(std::string nick, QColor color)
+{
+    int i, j;
+    for (i = 0; i < table->rowCount(); i++) {
+            std::string nick_tmp =  table->item(i, 0)->text().toStdString();
+            if (nick_tmp == nick) {
+                for (j = 0; j < table->columnCount(); j++) {
+                    table->item(i, j)->setBackground(color);
+                }
+            }
+    }
+}

@@ -10,6 +10,7 @@ GameWindow::GameWindow(Client *cl, ConfigWindow* prev_window, QWidget *parent) :
 	msg_browser = new Messenger(ui->textBrowser, ui->labelWord); // создание мессенджера
 	gui = new ClientInterface(timeController, msg_browser, board);
     window_config = prev_window;
+    client = cl;
 
 	connect(timeController->timer, SIGNAL(timeout()), this, SLOT(SlotTimerIt()));
 	connect(this, SIGNAL(SigTimerStart()), this, SLOT(SlotTimerStart()));
@@ -67,6 +68,8 @@ void GameWindow::SlotSpoilerWarning() {
 
 void GameWindow::SlotUpdateLeaderboard() {
 	gui->board->UpdateLeaderboard(leaderboard);
+    Board *board_child = (Board*)(gui->board);
+    board_child->colorNick(client->getNick(), QColor(250, 168, 35));
 }
 
 void GameWindow::SlotUpdateMessages() {
