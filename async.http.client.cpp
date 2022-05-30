@@ -245,7 +245,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 			handle_write(err);
 		}
 
-		if (request.method == "game_over") {
+		if (request.method == "gameover") {
 			w->configWindow->gameWindow->ShowConfig();
 			handle_write(err);
 		}
