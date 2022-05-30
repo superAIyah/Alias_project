@@ -30,7 +30,7 @@ void MainWindow::on_pushButton_clicked()
     user.login = ui->login->text().toStdString();
     std::string passw = ui->password->text().toStdString(); // !-- NEW: строка пороля --!
     // <-- вызов функции клиента авторизации -->
-	client_->send_auth(user.login);
+	client_->send_auth(user.login, passw);
 }
 
 void MainWindow::next_window(){

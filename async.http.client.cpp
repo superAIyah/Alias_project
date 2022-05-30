@@ -92,6 +92,11 @@ Request Client::parse(std::string req_data) {
 	if (request.method == "auth") {
 		request.parameters["status"] = request_arr[1];
 	}
+	if (request.method == "user_info") {
+		request.parameters["num_of_wins"] = request_arr[1];
+		request.parameters["num_of_losses"] = request_arr[2];
+		request.parameters["player_rating"] = request_arr[3];
+	}
 
 	return request;
 }
@@ -117,8 +122,8 @@ std::string Client::BufferData(boost::asio::streambuf *b) {
 }
 
 
-std::string Client::serialize_auth(std::string user_login) {
-	return "auth\r\n" + user_login + "\r\n\r\n";
+std::string Client::serialize_auth(std::string user_login, std::string pwd) {
+	return "auth\r\n" + user_login + "\r\n" + pwd + "\r\n\r\n";
 }
 
 std::string Client::serialize_settings(GameConfig settings) {
@@ -134,9 +139,9 @@ std::string Client::serialize_round() {
 	return "round\r\n" + std::to_string(game_id_) + "\r\n\r\n";
 }
 
-void Client::send_auth(std::string user_login) {
+void Client::send_auth(std::string user_login, std::string pwd) {
 	user_login_ = user_login;
-	std::string str = serialize_auth(user_login);
+	std::string str = serialize_auth(user_login, pwd);
 	boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
 	                         boost::bind(&Client::handle_multiwrite, this,
 	                                     boost::asio::placeholders::error));
@@ -252,6 +257,11 @@ void Client::handle_read(const boost::system::error_code &err) {
 
 		if (request.method == "warning") {
 			w->configWindow->gameWindow->ShowWarning();
+			handle_write(err);
+		}
+
+		if(request.method == "user_info") {
+			w->configWindow->update_stats(user_login_, std::stoi(request.parameters["num_of_wins"]), std::stoi(request.parameters["num_of_losses"]), (unsigned int) std::stoi(request.parameters["player_rating"]));
 			handle_write(err);
 		}
 	}

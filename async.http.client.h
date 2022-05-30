@@ -49,7 +49,7 @@ class Client : QObject {
 public:
 	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread *thread);
 
-	void send_auth(std::string user_login);
+	void send_auth(std::string user_login, std::string pwd);
 
 	void send_settings(GameConfig settings, int num_teams, int round_duration_);
 
@@ -75,7 +75,7 @@ private:
 
 	std::string BufferData(boost::asio::streambuf *b);
 
-	std::string serialize_auth(std::string user_login);
+	std::string serialize_auth(std::string user_login, std::string pwd);
 
 	std::string serialize_settings(GameConfig settings);
 

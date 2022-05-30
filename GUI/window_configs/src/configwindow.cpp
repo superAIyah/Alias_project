@@ -73,7 +73,7 @@ void ConfigWindow::on_findGameButton_clicked()
 	lbl->show();
 	lbl->setAlignment(Qt::AlignCenter);
     movie->start();
-    update_stats("VANYA", 100, 0, 1); // МЕТОД КОТОРЫЙ ДОЛЖЕН ВЫЗЫВАТЬСЯ КЛИЕНТОМ (тест)
+//    update_stats("VANYA", 100, 0, 1); // МЕТОД КОТОРЫЙ ДОЛЖЕН ВЫЗЫВАТЬСЯ КЛИЕНТОМ (тест)
     // <-- вызов функции поиска игры клиента  -->
 	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
