@@ -23,6 +23,7 @@ Request Client::parse(std::string req_data) {
 		request_arr.push_back(token);
 		req_data.erase(0, pos + 2);
 	}
+	request_arr.pop_back();
 
 
 	request.method = request_arr[0];
@@ -109,21 +110,28 @@ Client::Client(boost::asio::io_context &io_context, const std::string &server_, 
 }
 
 
+std::string Client::BufferData(boost::asio::streambuf *b) {
+	std::istream is(b);
+	std::string line(std::istreambuf_iterator<char>(is), {});
+	return line;
+}
+
+
 std::string Client::serialize_auth(std::string user_login) {
-	return "auth\r\n" + user_login + "\r\n";
+	return "auth\r\n" + user_login + "\r\n\r\n";
 }
 
 std::string Client::serialize_settings(GameConfig settings) {
-	return "settings\r\n" + user_login_ + "\r\n" + settings.GetSettings();
+	return "settings\r\n" + user_login_ + "\r\n" + settings.GetSettings() + "\r\n";
 }
 
 std::string Client::serialize_msg(Message msg) {
 	return "msg\r\n" + user_login_ + "\r\n" + std::to_string(game_id_) + "\r\n" + std::to_string(team_id_) + "\r\n" + msg.msg + "\r\n" +
-			(user_login_ == host_login ? "host" : "not_host") + "\r\n";
+	       (user_login_ == host_login ? "host" : "not_host") + "\r\n\r\n";
 }
 
 std::string Client::serialize_round() {
-	return "round\r\n" + std::to_string(game_id_) + "\r\n";
+	return "round\r\n" + std::to_string(game_id_) + "\r\n\r\n";
 }
 
 void Client::send_auth(std::string user_login) {
@@ -153,7 +161,7 @@ void Client::send_msg(std::string text) {
 }
 
 void Client::send_round() {
-	if(!sent_round) {
+	if (!sent_round) {
 		sent_round = true;
 		std::string str = serialize_round();
 		boost::asio::async_write(socket_, boost::asio::buffer(str.data(), str.size()),
@@ -177,14 +185,17 @@ void Client::handle_resolve(const boost::system::error_code &err, const tcp::res
 
 void Client::handle_read(const boost::system::error_code &err) {
 	if (!err) {
+		
+		std::string response_buf_str = BufferData(&response_buf_);
 		//                вывод в консоль
-		std::cout << response_buf_.data() << std::endl;
+		std::cout << response_buf_str << std::endl << std::endl;
 
 //                парсинг
-		Request request = parse(std::string(response_buf_.data()));
+		Request request = parse(std::string(response_buf_str));
 
 //              очистка буфера
-		response_buf_.fill('\0');
+//		response_buf_.fill('\0');
+		response_buf_.consume(response_buf_str.size());
 
 		if (request.method == "auth") {
 			if (request.parameters["status"] == "ok") {
@@ -251,12 +262,11 @@ void Client::handle_read(const boost::system::error_code &err) {
 
 void Client::handle_write(const boost::system::error_code &err) {
 	if (!err) {
-		// Read the response status line. The response_ streambuf will
-		// automatically grow to accommodate the entire line. The growth may be
-		// limited by passing a maximum size to the streambuf constructor.
-		socket_.async_read_some(boost::asio::buffer(response_buf_),
-		                        boost::bind(&Client::handle_read, this,
-		                                    boost::asio::placeholders::error));
+		boost::asio::async_read_until(socket_, response_buf_, "\r\n\r\n",
+		                              boost::bind(&Client::handle_read, this, boost::asio::placeholders::error));
+//		socket_.async_read_some(boost::asio::buffer(response_buf_),
+//		                        boost::bind(&Client::handle_read, this,
+//		                                    boost::asio::placeholders::error));
 	}
 	else {
 		std::cout << "Error3: " << err.message() << "\n";

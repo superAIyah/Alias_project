@@ -13,9 +13,9 @@ void Board::makeTable(int row, int col) {
 }
 
 unsigned int Board::UpdateLeaderboard(LeaderBoard lb) {
-    std::cout << lb.size << std::endl;
+//    std::cout << lb.size << std::endl;
     makeTable(lb.size, 3); // корректировка размеров таблицы
-    std::cout << "OK" << std::endl;
+//    std::cout << "OK" << std::endl;
     //std::cout << lb.leaders[0].points;// << " " << lb.leaders[0].points << " " << lb.leaders[0].host << std::endl;
     for (int i = 0; i < lb.size; i++) {
         QTableWidgetItem *item = new QTableWidgetItem;

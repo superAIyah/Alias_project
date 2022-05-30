@@ -38,17 +38,17 @@ void ConfigWindow::on_findGameButton_clicked()
 	Setting team_cnt(team_cnt_radios);
 	Setting team_sz(team_sz_radios);
 
-	std::cout << "OLD: " << team_cnt.collectSetting() << std::endl;
+//	std::cout << "OLD: " << team_cnt.collectSetting() << std::endl;
 
 	if (mode.collectSetting() == "1") { // если одиночный режим
-		std::cout << "One player!" << std::endl;
+//		std::cout << "One player!" << std::endl;
 		team_cnt = Setting(game_mode); // то кол-во команд = 1
 	}
 
-	std::cout << "LEVEL: " << level.collectSetting() << std::endl;
-	std::cout << "TEAM_SZ: " << team_sz.collectSetting() << std::endl;
-	std::cout << "TEAM_CNT: " << team_cnt.collectSetting() << std::endl;
-	std::cout << "ROUND: " << round.collectSetting() << std::endl;
+//	std::cout << "LEVEL: " << level.collectSetting() << std::endl;
+//	std::cout << "TEAM_SZ: " << team_sz.collectSetting() << std::endl;
+//	std::cout << "TEAM_CNT: " << team_cnt.collectSetting() << std::endl;
+//	std::cout << "ROUND: " << round.collectSetting() << std::endl;
 
 	// Список со всеми настройками (Полиморфизм)
 	std::vector<ISetting *> configs = {&level, &team_sz, &team_cnt, &round};
@@ -66,7 +66,7 @@ void ConfigWindow::on_findGameButton_clicked()
 
 	QLabel *lbl = ui->labelGIF; // запуск гифки поиска игры
 	std::string gif_path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
-	std::cout << gif_path << std::endl;
+//	std::cout << gif_path << std::endl;
 	QMovie *movie = new QMovie(QString::fromStdString(gif_path));
 	lbl->setMovie(movie);
 	lbl->resize(200, 200);

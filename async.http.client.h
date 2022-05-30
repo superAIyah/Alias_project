@@ -71,6 +71,8 @@ public:
 private:
 	Request parse(std::string req_data);
 
+	std::string BufferData(boost::asio::streambuf *b);
+
 	std::string serialize_auth(std::string user_login);
 
 	std::string serialize_settings(GameConfig settings);
@@ -82,7 +84,7 @@ private:
 	tcp::resolver resolver_;
 	tcp::socket socket_;
 
-	std::array<char, 8192> response_buf_;
+	boost::asio::streambuf response_buf_;
 
 	Request request_;
 	Response response_;
