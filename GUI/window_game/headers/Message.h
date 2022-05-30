@@ -8,6 +8,8 @@ class Message{
 public:
     Message(std::string, bool, std::string);
 	Message() = default;
+    void colorIt();
+
     std::string name; // имя пользователя
     bool me; // флаг, мое ли это сообщение (чтобы виделять отдельным цветом)
     std::string msg;

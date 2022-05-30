@@ -66,3 +66,14 @@ void Board::colorHost(QColor color)
         }
     }
 }
+
+std::string Board::getHost()
+{
+    for (int i = 0; i < table->rowCount(); i++) {
+        std::string host =  table->item(i, 2)->text().toStdString();
+        if (host == "*") {
+            return table->item(i, 0)->text().toStdString();
+        }
+    }
+    return "";
+}
