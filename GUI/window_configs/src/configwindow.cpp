@@ -38,17 +38,10 @@ void ConfigWindow::on_findGameButton_clicked()
 	Setting team_cnt(team_cnt_radios);
 	Setting team_sz(team_sz_radios);
 
-	std::cout << "OLD: " << team_cnt.collectSetting() << std::endl;
-
 	if (mode.collectSetting() == "1") { // если одиночный режим
 		std::cout << "One player!" << std::endl;
 		team_cnt = Setting(game_mode); // то кол-во команд = 1
 	}
-
-	std::cout << "LEVEL: " << level.collectSetting() << std::endl;
-	std::cout << "TEAM_SZ: " << team_sz.collectSetting() << std::endl;
-	std::cout << "TEAM_CNT: " << team_cnt.collectSetting() << std::endl;
-	std::cout << "ROUND: " << round.collectSetting() << std::endl;
 
 	// Список со всеми настройками (Полиморфизм)
 	std::vector<ISetting *> configs = {&level, &team_sz, &team_cnt, &round};
@@ -73,10 +66,7 @@ void ConfigWindow::on_findGameButton_clicked()
 	lbl->show();
 	lbl->setAlignment(Qt::AlignCenter);
     movie->start();
-    //movie->stop();
-	//qDebug() << "abc" << "def";
-//    std::string  path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
-//    qDebug() << path.c_str();
+    update_stats("VANYA", 100, 0, 1); // МЕТОД КОТОРЫЙ ДОЛЖЕН ВЫЗЫВАТЬСЯ КЛИЕНТОМ (тест)
     // <-- вызов функции поиска игры клиента  -->
 	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
@@ -85,6 +75,26 @@ void ConfigWindow::next_window(){
     ui->labelGIF->hide();
 	gameWindow->ShowWindow();
     this->hide();
+}
+
+void ConfigWindow::update_stats(std::string login, int win_cnt, int lose_cnt, int rating)
+{
+    QLabel* label_log = ui->labelLogin;
+    std::string log_pref = " Логин: ";
+    label_log->setText(QString::fromStdString(log_pref + login));
+
+    QLabel* label_win = ui->labelWinCnt;
+    std::string win_pref = " Кол-во побед: ";
+    label_win->setText(QString::fromStdString(win_pref + std::to_string(win_cnt)));
+
+    QLabel* label_lose = ui->labelLoseCnt;
+    std::string lose_pref = " Кол-во поражений: ";
+    label_lose->setText(QString::fromStdString(lose_pref + std::to_string(lose_cnt)));
+
+    QLabel* label_rating = ui->labelRating;
+    std::string rating_pref = " Общий рейтинг: ";
+    label_rating->setText(QString::fromStdString(rating_pref + std::to_string(rating)));
+
 }
 
 void ConfigWindow::on_e1_clicked() // выбран одиночный режим

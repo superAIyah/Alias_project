@@ -32,12 +32,16 @@
        </property>
        <property name="styleSheet">
         <string notr="true">QLabel {
+	font: 14pt &quot;Ubuntu Condensed&quot;;
 background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(64, 255, 238, 255), stop:1 rgba(255, 188, 56, 255));
 border-radius: 10px;
 }</string>
        </property>
        <property name="text">
         <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -45,12 +49,16 @@ border-radius: 10px;
       <widget class="QLabel" name="labelWinCnt">
        <property name="styleSheet">
         <string notr="true">QLabel {
+	font: 14pt &quot;Ubuntu Condensed&quot;;
 background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(64, 255, 238, 255), stop:1 rgba(255, 188, 56, 255));
 border-radius: 10px;
 }</string>
        </property>
        <property name="text">
         <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -58,12 +66,16 @@ border-radius: 10px;
       <widget class="QLabel" name="labelLoseCnt">
        <property name="styleSheet">
         <string notr="true">QLabel {
+	font: 14pt &quot;Ubuntu Condensed&quot;;
 background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(64, 255, 238, 255), stop:1 rgba(255, 188, 56, 255));
 border-radius: 10px;
 }</string>
        </property>
        <property name="text">
         <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -71,12 +83,16 @@ border-radius: 10px;
       <widget class="QLabel" name="labelRating">
        <property name="styleSheet">
         <string notr="true">QLabel {
+	font: 14pt &quot;Ubuntu Condensed&quot;;
 background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(64, 255, 238, 255), stop:1 rgba(255, 188, 56, 255));
 border-radius: 10px;
 }</string>
        </property>
        <property name="text">
         <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>

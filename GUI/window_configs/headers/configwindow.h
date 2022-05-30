@@ -23,6 +23,7 @@ public:
     ~ConfigWindow();
 
 	void next_window();
+    void update_stats(std::string login, int win_cnt, int lose_cnt, int rating);
 
     GameWindow *gameWindow;
 
