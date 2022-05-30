@@ -70,6 +70,7 @@ void GameWindow::SlotUpdateLeaderboard() {
 	gui->board->UpdateLeaderboard(leaderboard);
     Board *board_child = (Board*)(gui->board);
     board_child->colorNick(client->getNick(), QColor(250, 168, 35));
+    board_child->colorHost(QColor(41, 227, 153));
 }
 
 void GameWindow::SlotUpdateMessages() {

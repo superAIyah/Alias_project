@@ -12,6 +12,7 @@ public:
     void makeTable(int row, int col);
     unsigned int UpdateLeaderboard(LeaderBoard lb) override;
     void colorNick(std::string nick, QColor color);
+    void colorHost(QColor color);
 private:
     QTableWidget* table; // ссылка на табличку
 };
