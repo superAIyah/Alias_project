@@ -28,6 +28,7 @@ void MainWindow::on_pushButton_clicked()
 {
     User user;
     user.login = ui->login->text().toStdString();
+    std::string passw = ui->password->text().toStdString();
     // <-- вызов функции клиента авторизации -->
 	client_->send_auth(user.login);
 
