@@ -42,3 +42,38 @@ unsigned int Board::UpdateLeaderboard(LeaderBoard lb) {
     }
     return 0; // все OK
 }
+
+void Board::colorNick(std::string nick, QColor color)
+{
+    for (int i = 0; i < table->rowCount(); i++) {
+        std::string nick_tmp =  table->item(i, 0)->text().toStdString();
+        if (nick_tmp == nick) {
+            for (int j = 0; j < table->columnCount(); j++) {
+                table->item(i, j)->setBackground(color);
+            }
+        }
+    }
+}
+
+void Board::colorHost(QColor color)
+{
+    for (int i = 0; i < table->rowCount(); i++) {
+        std::string host =  table->item(i, 2)->text().toStdString();
+        if (host == "*") {
+            for (int j = 0; j < table->columnCount(); j++) {
+                table->item(i, j)->setBackground(color);
+            }
+        }
+    }
+}
+
+std::string Board::getHost()
+{
+    for (int i = 0; i < table->rowCount(); i++) {
+        std::string host =  table->item(i, 2)->text().toStdString();
+        if (host == "*") {
+            return table->item(i, 0)->text().toStdString();
+        }
+    }
+    return "";
+}

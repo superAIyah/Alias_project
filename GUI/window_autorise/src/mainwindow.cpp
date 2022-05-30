@@ -28,18 +28,9 @@ void MainWindow::on_pushButton_clicked()
 {
     User user;
     user.login = ui->login->text().toStdString();
+    std::string passw = ui->password->text().toStdString(); // !-- NEW: строка пороля --!
     // <-- вызов функции клиента авторизации -->
 	client_->send_auth(user.login);
-
-//    if (user.login == "test") {
-//        ui->statusbar->showMessage("Вы успешно авторизовались!");
-//        configWindow->show();
-//        this->hide();
-//    } else {
-//        ui->statusbar->showMessage("Ошибка авторизации.");
-//    }
-//    configWindow->show();
-//    this->hide();
 }
 
 void MainWindow::next_window(){

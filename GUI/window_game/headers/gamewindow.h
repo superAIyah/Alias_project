@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include <string>
 #include "timer.h"
 #include "board.h"
 #include "messenger.h"
@@ -83,6 +84,7 @@ signals:
 
 private:
 
+    Client* client;
     ConfigWindow *window_config;
 	Ui::GameWindow *ui;
 	Client *client_;

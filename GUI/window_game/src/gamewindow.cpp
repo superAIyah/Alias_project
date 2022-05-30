@@ -10,6 +10,7 @@ GameWindow::GameWindow(Client *cl, ConfigWindow* prev_window, QWidget *parent) :
 	msg_browser = new Messenger(ui->textBrowser, ui->labelWord); // создание мессенджера
 	gui = new ClientInterface(timeController, msg_browser, board);
     window_config = prev_window;
+    client = cl;
 
 	connect(timeController->timer, SIGNAL(timeout()), this, SLOT(SlotTimerIt()));
 	connect(this, SIGNAL(SigTimerStart()), this, SLOT(SlotTimerStart()));
@@ -71,11 +72,30 @@ void GameWindow::SlotSpoilerWarning() {
 }
 
 void GameWindow::SlotUpdateLeaderboard() {
+    std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Word</span>";
+    Message msg(new_word, 0, "");
+    gui->messenger->ShowMessages({msg}); // показать в чат всем, что слово обновилось
+
 	gui->board->UpdateLeaderboard(leaderboard);
+    Board *board_child = (Board*)(gui->board);
+    board_child->colorNick(client->getNick(), QColor(250, 168, 35)); // покраска участника
+    board_child->colorHost(QColor(41, 227, 153)); // покраска хоста
 }
 
 void GameWindow::SlotUpdateMessages() {
 	std::vector<Message> msgs({last_msg});
+
+    Board *board_child = (Board*)(gui->board); // покраска сообщений хоста
+    std::string color_host_pref = "<span style='color: #29e399'>";
+    std::string color_host_suf = "</span>";
+    std::string host_name = board_child->getHost();
+    for (int i = 0; i < msgs.size(); i++) {
+        Message sms = msgs[i];
+        if (sms.me) continue;
+        if (sms.name == host_name)
+            msgs[i].msg = color_host_pref + sms.msg + color_host_suf;
+    }
+
 	gui->messenger->ShowMessages(msgs);
 }
 
