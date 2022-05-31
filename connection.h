@@ -47,6 +47,7 @@ public:
 	void start();
 
 private:
+	std::string BufferData(boost::asio::streambuf *b);
 	/// Handle completion of a read operation.
 	void handle_read(const boost::system::error_code &e,
 	                 std::size_t bytes_transferred);
@@ -60,11 +61,13 @@ private:
 
 	void authorization(Request request);
 	void already_online();
+	void wrong_pwd();
 	void not_online(std::string user_login);
 	void new_client(std::string user_login, std::string password);
 
 
 	void settings(Request request, const boost::system::error_code &e);
+	void UpdateStats(boost::asio::ip::tcp::socket *sock, std::string user_login);
 
 
 	void msg(Request request, const boost::system::error_code &e);

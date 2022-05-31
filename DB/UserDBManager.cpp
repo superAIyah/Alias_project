@@ -63,7 +63,18 @@ void UserDBManager::UpdateUser(std::string login_, bool win){
 	}
 }
 
-bool UserDBManager::has_user(std::string login_){
+int UserDBManager::has_user(std::string login_, std::string pwd){
 	mysqlx::Row row = session->sql("SELECT EXISTS (SELECT * FROM users WHERE login = ?);").bind(login_).execute().fetchOne();
-	return row[0].get<int>();
+	if(row[0].get<int>()){
+		mysqlx::Row row1 = user.select("password").where("login = :login_").bind("login_", login_).execute().fetchOne();
+		if(row1[0].get<std::string>() == pwd){
+			return USER_FOUND;
+		}
+		else {
+			return WRONG_PASSWORD;
+		}
+	}
+	else {
+		return USER_NOT_FOUND;
+	}
 }

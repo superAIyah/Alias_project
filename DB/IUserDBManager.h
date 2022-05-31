@@ -3,6 +3,10 @@
 #include <vector>
 #include "tables.h"
 
+#define WRONG_PASSWORD -1
+#define USER_NOT_FOUND 0
+#define USER_FOUND 1
+
 struct UserInfo{
 	int num_of_wins;
 	int num_of_losses;
@@ -27,7 +31,7 @@ public:
     virtual std::vector<User> get_all_users(std::vector<int> UserIDs) = 0;
 
 //проверка на существование пользователя
-	virtual bool has_user(std::string login_) = 0;
+	virtual int has_user(std::string login_, std::string pwd) = 0;
 
 	virtual UserInfo GetInfo(std::string login_) = 0;
 
