@@ -38,6 +38,8 @@ private slots:
 	void on_e1_clicked();
 	void on_e2_clicked();
 	
+    void on_pushButton_clicked();
+
 signals:
 	void SigNextWindow();
 

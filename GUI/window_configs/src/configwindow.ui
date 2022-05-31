@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>851</width>
-    <height>382</height>
+    <width>759</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_6" stretch="1,4,3,0">
-   <item>
+  <layout class="QGridLayout" name="gridLayout" rowstretch="1,4,3,0">
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetMinimumSize</enum>
@@ -98,7 +98,7 @@ border-radius: 10px;
      </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QGroupBox" name="BoxLevel">
@@ -214,7 +214,7 @@ border-radius: 10px;
           <x>10</x>
           <y>30</y>
           <width>161</width>
-          <height>101</height>
+          <height>112</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -273,7 +273,7 @@ border-radius: 10px;
           <x>11</x>
           <y>31</y>
           <width>161</width>
-          <height>101</height>
+          <height>112</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
@@ -363,7 +363,7 @@ border-radius: 10px;
      </item>
     </layout>
    </item>
-   <item>
+   <item row="2" column="0">
     <widget class="QLabel" name="labelGIF">
      <property name="maximumSize">
       <size>
@@ -376,24 +376,41 @@ border-radius: 10px;
      </property>
     </widget>
    </item>
-   <item>
-    <widget class="QPushButton" name="findGameButton">
-     <property name="minimumSize">
-      <size>
-       <width>50</width>
-       <height>50</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Поиск игры</string>
-     </property>
-    </widget>
+   <item row="3" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Правила</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="findGameButton">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Поиск игры</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
