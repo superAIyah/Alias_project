@@ -4,6 +4,7 @@
 class ConfigWindow;
 
 #include <QDialog>
+#include <QGroupBox>
 
 #include "gamewindow.h"
 #include "../../../async.http.client.h"
@@ -25,6 +26,8 @@ public:
 	void MyShow();
 
 	void NextWindow();
+    void hideGroupBoxes(std::vector<QGroupBox*>);
+    void showGroupBoxes(std::vector<QGroupBox*>);
     void update_stats(std::string login, int win_cnt, int lose_cnt, int rating);
 
     GameWindow *gameWindow;

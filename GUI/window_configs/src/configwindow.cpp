@@ -14,7 +14,7 @@ ConfigWindow::ConfigWindow(Client* cl, QWidget *parent) :
     ui(new Ui::ConfigWindow), client_(cl), gameWindow(nullptr)
 {
     ui->setupUi(this);
-//    gameWindow = new GameWindow(cl, this);
+    hideGroupBoxes({ui->BoxTeamCnt, ui->BoxTeamSz, ui->BoxLength});
 
 	connect(this, SIGNAL(SigNextWindow()), this, SLOT(SlotNextWindow()));
 }
@@ -46,17 +46,10 @@ void ConfigWindow::on_findGameButton_clicked()
 	Setting team_cnt(team_cnt_radios);
 	Setting team_sz(team_sz_radios);
 
-//	std::cout << "OLD: " << team_cnt.collectSetting() << std::endl;
-
 	if (mode.collectSetting() == "1") { // если одиночный режим
 //		std::cout << "One player!" << std::endl;
 		team_cnt = Setting(game_mode); // то кол-во команд = 1
 	}
-
-//	std::cout << "LEVEL: " << level.collectSetting() << std::endl;
-//	std::cout << "TEAM_SZ: " << team_sz.collectSetting() << std::endl;
-//	std::cout << "TEAM_CNT: " << team_cnt.collectSetting() << std::endl;
-//	std::cout << "ROUND: " << round.collectSetting() << std::endl;
 
 	// Список со всеми настройками (Полиморфизм)
 	std::vector<ISetting *> configs = {&level, &team_sz, &team_cnt, &round};
@@ -74,20 +67,32 @@ void ConfigWindow::on_findGameButton_clicked()
 
 	QLabel *lbl = ui->labelGIF; // запуск гифки поиска игры
 	std::string gif_path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
-//	std::cout << gif_path << std::endl;
 	QMovie *movie = new QMovie(QString::fromStdString(gif_path));
 	lbl->setMovie(movie);
 	lbl->resize(200, 200);
 	lbl->show();
 	lbl->setAlignment(Qt::AlignCenter);
     movie->start();
-//    update_stats("VANYA", 100, 0, 1); // МЕТОД КОТОРЫЙ ДОЛЖЕН ВЫЗЫВАТЬСЯ КЛИЕНТОМ (тест)
     // <-- вызов функции поиска игры клиента  -->
 	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
 
 void ConfigWindow::NextWindow(){
     emit SigNextWindow();
+}
+
+void ConfigWindow::hideGroupBoxes(std::vector<QGroupBox *> mas)
+{
+    for (auto box : mas) {
+        box->setVisible(false);
+    }
+}
+
+void ConfigWindow::showGroupBoxes(std::vector<QGroupBox *> mas)
+{
+    for (auto box : mas) {
+        box->setVisible(true);
+    }
 }
 
 void ConfigWindow::SlotNextWindow(){
@@ -118,12 +123,15 @@ void ConfigWindow::update_stats(std::string login, int win_cnt, int lose_cnt, in
 
 void ConfigWindow::on_e1_clicked() // выбран одиночный режим
 {
-	ui->BoxTeamCnt->setVisible(false);
+    hideGroupBoxes({ui->BoxTeamCnt});
+    showGroupBoxes({ui->BoxTeamSz, ui->BoxLength});
+    //ui->BoxTeamCnt->setVisible(false);
 	ui->BoxTeamSz->setTitle("Количество игроков");
 }
 
 void ConfigWindow::on_e2_clicked() // выбран командный режим
 {
-	ui->BoxTeamCnt->setVisible(true);
+    showGroupBoxes({ui->BoxTeamCnt, ui->BoxLength, ui->BoxTeamSz});
+    //ui->BoxTeamCnt->setVisible(true);
 	ui->BoxTeamSz->setTitle("Игроков в команде");
 }

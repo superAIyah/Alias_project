@@ -63,6 +63,11 @@ void GameWindow::ShowConfig() {
 }
 
 void GameWindow::SlotTimerStart() {
+    // Уведомление в чате об обновлении раунда
+    std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Round</span>";
+    Message msg(new_word, 0, "");
+    gui->messenger->ShowMessages({msg});
+
     gui->messenger->UpdateKeyword("Guess the word!");
 	timeController->start(client_->RoundDuration());
 }
@@ -71,7 +76,8 @@ void GameWindow::SlotSpoilerWarning() {
 	QMessageBox::critical(nullptr, "SigSpoilerWarning!", "You can't use a guessing word.");
 }
 
-void GameWindow::SlotUpdateLeaderboard() {
+void GameWindow::SlotUpdateLeaderboard() { // вызывается при отгадывании слова у каждого клиента
+    // напишем в чат всем пользователем, что слово обновилось
     std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Word</span>";
     Message msg(new_word, 0, "");
     gui->messenger->ShowMessages({msg}); // показать в чат всем, что слово обновилось
