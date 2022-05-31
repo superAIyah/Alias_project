@@ -22,10 +22,15 @@ public:
 //	MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow();
-	void next_window();
+	void NextWindow();
     ConfigWindow *configWindow;
 private slots:
     void on_pushButton_clicked();
+	void SlotNextWindow();
+
+signals:
+	void SigNextWindow();
+	
 private:
     Ui::MainWindow *ui;
 

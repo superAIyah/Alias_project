@@ -22,15 +22,21 @@ public:
     explicit ConfigWindow(Client* cl, QWidget *parent = nullptr);
     ~ConfigWindow();
 
-	void next_window();
+	void MyShow();
+
+	void NextWindow();
     void update_stats(std::string login, int win_cnt, int lose_cnt, int rating);
 
     GameWindow *gameWindow;
 
 private slots:
+	void SlotNextWindow();
     void on_findGameButton_clicked();
 	void on_e1_clicked();
 	void on_e2_clicked();
+	
+signals:
+	void SigNextWindow();
 
 private:
     Ui::ConfigWindow *ui;

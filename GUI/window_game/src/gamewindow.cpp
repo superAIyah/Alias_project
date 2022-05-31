@@ -118,6 +118,6 @@ void GameWindow::on_pushButton_clicked() {
 }
 
 void GameWindow::SlotShowConfig() {
-    window_config->show();
-    this->hide();
+    window_config->MyShow();
+//    this->hide();
 }

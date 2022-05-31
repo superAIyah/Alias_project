@@ -205,17 +205,21 @@ void Client::handle_read(const boost::system::error_code &err) {
 		if (request.method == "auth") {
 			if (request.parameters["status"] == "ok") {
 				//  Вызываем функцию ФЕДИ! (для открытия окна)
-				w->next_window();
+				w->NextWindow();
 				handle_write(err);
 			}
 			else if (request.parameters["status"] == "already_online") {
 				//  Вызываем функцию ФЕДИ! (для вывода ошибки)
 				handle_write(err);
 			}
+			else if (request.parameters["status"] == "wrong_password") {
+				//  Вызываем функцию ФЕДИ! (для вывода ошибки)
+				handle_write(err);
+			}
 		}
 
 		if (request.method == "settings") {
-			w->configWindow->next_window();
+			w->configWindow->NextWindow();
 			w->configWindow->gameWindow->UpdateLeaderboard(leaderboard_);
 //			w->configWindow->gameWindow->timeController->timer->moveToThread(thread_);
 			handle_write(err);
@@ -247,6 +251,8 @@ void Client::handle_read(const boost::system::error_code &err) {
 
 		if (request.method == "gameover") {
 			w->configWindow->gameWindow->ShowConfig();
+			leaderboard_.Clear();
+			team_players.clear();
 			handle_write(err);
 		}
 

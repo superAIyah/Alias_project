@@ -8,6 +8,8 @@ MainWindow::MainWindow(Client* cl, QWidget *parent)
 {
     ui->setupUi(this);
     configWindow = new ConfigWindow(cl);
+
+	connect(this, SIGNAL(SigNextWindow()), this, SLOT(SlotNextWindow()));
 }
 
 //MainWindow::MainWindow(QWidget *parent)
@@ -33,7 +35,11 @@ void MainWindow::on_pushButton_clicked()
 	client_->send_auth(user.login, passw);
 }
 
-void MainWindow::next_window(){
-	configWindow->show();
+void MainWindow::NextWindow(){
+	emit SigNextWindow();
+}
+
+void MainWindow::SlotNextWindow(){
+	configWindow->MyShow();
 	this->hide();
 }

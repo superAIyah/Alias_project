@@ -8,6 +8,7 @@ class LeaderBoard {
 public:
     LeaderBoard(std::vector<Leader>);
 	LeaderBoard() = default;
+	void Clear();
     std::vector<Leader> leaders;
     int size;
 };

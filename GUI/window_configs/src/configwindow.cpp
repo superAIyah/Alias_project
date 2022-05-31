@@ -11,15 +11,23 @@
 
 ConfigWindow::ConfigWindow(Client* cl, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ConfigWindow), client_(cl)
+    ui(new Ui::ConfigWindow), client_(cl), gameWindow(nullptr)
 {
     ui->setupUi(this);
-    gameWindow = new GameWindow(cl, this);
+//    gameWindow = new GameWindow(cl, this);
+
+	connect(this, SIGNAL(SigNextWindow()), this, SLOT(SlotNextWindow()));
 }
 
 ConfigWindow::~ConfigWindow()
 {
     delete ui;
+}
+
+void ConfigWindow::MyShow(){
+	if(gameWindow){delete gameWindow;}
+	gameWindow = new GameWindow(client_, this);
+	this->show();
 }
 
 void ConfigWindow::on_findGameButton_clicked()
@@ -78,10 +86,14 @@ void ConfigWindow::on_findGameButton_clicked()
 	client_->send_settings(game_config, std::stoi(team_cnt.collectSetting()), std::stoi(round.collectSetting()));
 }
 
-void ConfigWindow::next_window(){
-    ui->labelGIF->hide();
+void ConfigWindow::NextWindow(){
+    emit SigNextWindow();
+}
+
+void ConfigWindow::SlotNextWindow(){
+	ui->labelGIF->hide();
 	gameWindow->ShowWindow();
-    this->hide();
+	this->hide();
 }
 
 void ConfigWindow::update_stats(std::string login, int win_cnt, int lose_cnt, int rating)
