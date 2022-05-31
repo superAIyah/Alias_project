@@ -124,6 +124,9 @@ void GameWindow::on_pushButton_clicked() {
 }
 
 void GameWindow::SlotShowConfig() {
+    Board* brd = (Board*)gui->board; // чтобы вызвать дочерней метод базового класса
+    std::string winner = brd->getWinner();
+    QMessageBox::about(this, "Победители", winner.c_str());
     window_config->MyShow();
 //    this->hide();
 }

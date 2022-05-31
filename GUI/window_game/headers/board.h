@@ -14,6 +14,7 @@ public:
     void colorNick(std::string nick, QColor color);
     void colorHost(QColor color);
     std::string getHost();
+    std::string getWinner();
 private:
     QTableWidget* table; // ссылка на табличку
 };

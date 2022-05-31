@@ -77,3 +77,21 @@ std::string Board::getHost()
     }
     return "";
 }
+
+std::string Board::getWinner()
+{
+    int max = -1;
+    std::string winners = "";
+    for (int i = 0; i < table->rowCount(); i++) {
+        int point_tmp = table->item(i, 1)->text().toInt();
+        if (point_tmp == max) { // будет несколько победителей
+            winners += (std::string)"AND";
+            winners += table->item(i, 0)->text().toStdString();
+        }
+        if (point_tmp > max) {
+            winners = table->item(i, 0)->text().toStdString();
+            max = point_tmp;
+        }
+    }
+    return winners;
+}
