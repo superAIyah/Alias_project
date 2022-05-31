@@ -132,17 +132,6 @@ void Connection::not_online(std::string user_login) {
 
 }
 
-void Connection::UpdateStats(boost::asio::ip::tcp::socket *sock, std::string user_login) {
-	std::stringstream ss;
-
-	UserInfo info = Server->UDBM->GetInfo(user_login);
-	ss << "user_info\r\n" << info.num_of_wins << "\r\n" << info.num_of_losses << "\r\n" << info.player_rating << "\r\n\r\n";
-	std::string buffer = ss.str();
-	boost::asio::async_write(*sock, boost::asio::buffer(buffer.data(), buffer.size()),
-	                         boost::bind(&Connection::handle_write, shared_from_this(),
-	                                     boost::asio::placeholders::error));
-}
-
 void Connection::new_client(std::string user_login, std::string password) {
 	//запоминаем логин
 	user_login_ = user_login;
@@ -182,6 +171,17 @@ void Connection::authorization(Request request) {
 		wrong_pwd();
 	}
 
+}
+
+void Connection::UpdateStats(boost::asio::ip::tcp::socket *sock, std::string user_login) {
+	std::stringstream ss;
+
+	UserInfo info = Server->UDBM->GetInfo(user_login);
+	ss << "user_info\r\n" << info.num_of_wins << "\r\n" << info.num_of_losses << "\r\n" << info.player_rating << "\r\n\r\n";
+	std::string buffer = ss.str();
+	boost::asio::async_write(*sock, boost::asio::buffer(buffer.data(), buffer.size()),
+	                         boost::bind(&Connection::handle_write, shared_from_this(),
+	                                     boost::asio::placeholders::error));
 }
 
 
