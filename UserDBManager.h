@@ -23,7 +23,7 @@ public:
 
     std::vector<User> get_all_users(std::vector<int> UserIDs) override;
 
-	bool has_user(std::string login_) override;
+	int has_user(std::string login_, std::string pwd) override;
 
 	UserInfo GetInfo(std::string login_) override;
 
