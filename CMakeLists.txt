@@ -12,7 +12,7 @@ file(READ config.txt FULL_PATH_TO_MYSQL_CONNECTOR_CPP_DIR)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # Multithread Async HTTP Server
-add_executable(async.http.server connection.h connection.cpp request.h response.h router.h async.http.server.h async.http.server.cpp)
+add_executable(async.http.server Server/connection.h Server/connection.cpp Server/request.h Server/response.h Server/router.h Server/async.http.server.h Server/async.http.server.cpp)
 target_link_libraries(async.http.server  ${Boost_LIBRARIES} pthread)
 
 include_directories(${FULL_PATH_TO_MYSQL_CONNECTOR_CPP_DIR}/include)
