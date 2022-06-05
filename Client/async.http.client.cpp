@@ -250,7 +250,7 @@ void Client::handle_read(const boost::system::error_code &err) {
 		}
 
 		if (request.method == "gameover") {
-                        sent_round = false;
+			sent_round = false;
 			w->configWindow->gameWindow->ShowConfig();
 			leaderboard_.Clear();
 			team_players.clear();

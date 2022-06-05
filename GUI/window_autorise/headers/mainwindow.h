@@ -4,7 +4,7 @@
 class MainWindow;
 
 #include "../../window_configs/headers/configwindow.h"
-#include "../../../async.http.client.h"
+#include "../../../Client/async.http.client.h"
 #include <QMainWindow>
 //#include "gamewindow.h"
 

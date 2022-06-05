@@ -12,7 +12,7 @@
 
 class GameWindow;
 
-#include "../../../async.http.client.h"
+#include "../../../Client/async.http.client.h"
 
 
 namespace Ui {

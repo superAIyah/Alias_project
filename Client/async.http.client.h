@@ -11,14 +11,14 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <QThread>
 #include <QObject>
-#include "GUI/window_configs/headers/gameconfig.h"
+#include "gameconfig.h"
 #include "Message.h"
 #include "LeaderBoard.h"
 #include "Leader.h"
 
 class Client;
 
-#include "GUI/window_autorise/headers/mainwindow.h"
+#include "../GUI/window_autorise/headers/mainwindow.h"
 //#include "iclientinterface.h"
 #include <QApplication>
 

@@ -7,7 +7,7 @@ class ConfigWindow;
 #include <QGroupBox>
 
 #include "gamewindow.h"
-#include "../../../async.http.client.h"
+#include "../../../Client/async.http.client.h"
 
 class GameWindow;
 
