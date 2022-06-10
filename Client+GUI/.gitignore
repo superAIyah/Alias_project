@@ -1,6 +1,5 @@
-cmake-build-debug
+.DS_Store
 .idea
-useful.txt
 build
-config.txt
-test.txt
+cmake-build-debug
+readme.md
