@@ -1,7 +1,7 @@
 # VK C++ team project *Alias online*
 
 ### Работоспособность
-[Видео защита проекта](https://youtu.be/JPDpGDMTbyM) | [Презентация](https://disk.yandex.ru/d/puPg1l7krULvEw)
+[Видео защита проекта](https://youtu.be/JPDpGDMTbyM) | [Презентация](https://disk.yandex.ru/d/puPg1l7krULvEw) | [UML диаграмма](https://drive.google.com/file/d/1Poewjt5NdJ7CTs3k1GxJTFhvo8s4ET1p/view?usp=sharing)
 
 ### Идея
 Клиент-серверное приложение - игра *Alias online*.  
