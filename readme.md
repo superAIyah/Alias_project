@@ -11,9 +11,9 @@
 **Rules**: Host of the game recieves a word and has to explain it to others as fast as possible without using the word or any cognate words, and other players' goal is to be the one who guesses it correctly. After the word was guessed correctly, host recieves another one, and so on until the round is over, after whitch the new host is automatically chosen. All communication between host and players happens in group chat.
 
 **Дополнительно / Additionally**:  
-  \+ Возможность выбора одиночного/командного режима и других настроек / Ability to choose one-against-all/team-v-team mode and other settings
-  \+ Поддержка 3 уровней сложности слов / 3 levels of words' difficulty
-  \+ Рейтинг игроков по всему миру / Player rating across the entire game
+  \+ Возможность выбора одиночного/командного режима и других настроек / Ability to choose one-against-all/team-v-team mode and other settings  
+  \+ Поддержка 3 уровней сложности слов / 3 levels of words' difficulty  
+  \+ Рейтинг игроков по всему миру / Player rating across the entire game  
 ### Технологии / Technologies
 * Graphical user interface - **QT**
 * Data Base -**MySQL**
