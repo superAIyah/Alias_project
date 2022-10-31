@@ -18,7 +18,7 @@
 * Graphical user interface - **QT**
 * Data Base -**MySQL**
 * Server - **Boost**
-* Сборка - *CMake*
+* Build - *CMake*
 ### Участники команды:
 * Малахов Иван
 * Мицкевич Владислав
