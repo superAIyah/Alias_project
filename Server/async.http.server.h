@@ -9,18 +9,16 @@
 #include <ctime>
 #include <queue>
 
-
 class server;
-
 
 #include "connection.h"
 #include "request.h"
-#include "response.h"
-#include "router.h"
 
 #include "DBConnection.h"
 #include "UserDBManager.h"
 #include "WordDBManager.h"
+
+typedef boost::asio::ip::tcp tcp;
 
 const std::string HOST = "localhost";
 const std::string SCHEMA_NAME = "test";
@@ -31,15 +29,13 @@ const std::string PWD2 = "2222";
 
 #define USER_GUESS_POINTS "2"
 #define HOST_GUESS_POINTS "1"
-#define ROUND_TIME 60
 
 struct Table {
-//    std::string settings;
 	int num_players;
-	std::map<int, std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>>> team_sockets;
+	std::map<int, std::vector<std::pair<tcp::socket *, std::string>>> team_sockets;
 	std::map<int, std::queue<Word>> team_words;
 	std::map<int, Word> cur_words;
-	std::map<int, std::pair<boost::asio::ip::tcp::socket *, std::string>> hosts;
+	std::map<int, std::pair<tcp::socket *, std::string>> hosts;
 	std::map<std::string, int> leader_board;
 	int round_duration;
 	time_t round_end;
@@ -48,15 +44,13 @@ struct Table {
 };
 
 struct Lobby {
-	std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> players;
+	std::vector<std::pair<tcp::socket *, std::string>> players;
 };
 
 
-class server
-		: private boost::noncopyable {
+class server : private boost::noncopyable {
 public:
-	explicit server(const std::string &address, const std::string &port,
-	                std::size_t thread_pool_size);
+	explicit server(const std::string &address, const std::string &port, std::size_t thread_pool_size);
 
 	/// Run the server's io_context loop.
 	void run();
@@ -75,7 +69,7 @@ private:
 	void start_accept();
 
 	/// Handle completion of an asynchronous accept operation.
-	void handle_accept(const boost::system::error_code &e);
+	void handle_accept(boost::shared_ptr<Connection>& new_connection, const boost::system::error_code &e);
 
 	/// Handle a request to stop the server.
 	void handle_stop();
@@ -92,14 +86,7 @@ private:
 	boost::asio::signal_set signals_;
 
 	/// Acceptor used to listen for incoming connections.
-	boost::asio::ip::tcp::acceptor acceptor_;
-
-	/// The next connection to be accepted.
-	boost::shared_ptr<Connection> new_connection_;
-
-	/// The handler for all incoming requests.
-	Router<std::string (*)(const Request &request)> request_router;
-
+	tcp::acceptor acceptor_;
 };
 
 

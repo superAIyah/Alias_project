@@ -13,9 +13,7 @@ class Connection;
 #include <memory>
 #include <algorithm>
 
-#include "response.h"
 #include "request.h"
-#include "router.h"
 #include "async.http.server.h"
 
 
@@ -28,83 +26,80 @@ struct information
 	std::string str;
 };
 
+typedef boost::asio::ip::tcp tcp;
 
-
-class Connection
-		: public boost::enable_shared_from_this<Connection>,
-		  private boost::noncopyable {
+class Connection : public boost::enable_shared_from_this<Connection>, private boost::noncopyable {
 public:
 	/// Construct a connection with the given io_context.
-	Connection(boost::asio::io_context &io_context,
-	           Router<std::string (*)(const Request &request)> &requestRouter);
+	explicit Connection(boost::asio::io_context &io_context);
 
 	void SetServer(server *server) { Server = server; }
 
-/// Get the socket associated with the connection.
-	boost::asio::ip::tcp::socket &socket();
+	/// Get the socket associated with the connection.
+	tcp::socket &socket();
 
 	/// Start the first asynchronous operation for the connection.
 	void start();
 
+	typedef boost::shared_ptr<Connection> pointer;
+
+	///	Create Shared_ptr to new connection
+	static pointer create(boost::asio::io_context& io_context)
+	{
+		return pointer(new Connection(io_context));
+	}
+
 private:
-	std::string BufferData(boost::asio::streambuf *b);
+	/// Write to socket_
+	void write(tcp::socket& to_socket, std::string response, bool callback = true);
+
+	/// Read from socket_
+	void read();
+
 	/// Handle completion of a read operation.
-	void handle_read(const boost::system::error_code &e,
-	                 std::size_t bytes_transferred);
+	void handle_read(const boost::system::error_code &e, std::size_t bytes_transferred);
 
-	/// Handle completion of a write operation.
-	void handle_write(const boost::system::error_code &e);
+	void handle_write(bool callback, const boost::system::error_code &e);
 
-	void handle_multiwrite(const boost::system::error_code &e);
-
-	void send_kw_2_host(int game_id_, int team_id_);
+	void send_kw_to_host(int game_id_, int team_id_);
 
 	void authorization(Request request);
-	void already_online();
-	void wrong_pwd();
-	void not_online(std::string user_login);
-	void new_client(std::string user_login, std::string password);
-
+	void auth_already_online();
+	void auth_wrong_pwd();
+	void auth_not_online(const std::string &user_login);
+	void auth_new_client(const std::string &user_login, std::string password);
 
 	void settings(Request request, const boost::system::error_code &e);
-	void UpdateStats(boost::asio::ip::tcp::socket *sock, std::string user_login);
-
+	void update_stats(tcp::socket &sock, std::string user_login, bool last);
 
 	void msg(Request request, const boost::system::error_code &e);
-	std::string text_msg(information info);
-	void is_host(information info,const boost::system::error_code &e);
-	void is_not_host(information info, const boost::system::error_code &e);
-	std::string guess_msg(information info);
-
+	static std::string text_msg(const information& info);
+	void msg_from_host(const information& info, const boost::system::error_code &e);
+	void msg_from_player(const information& info, const boost::system::error_code &e);
+	std::string guess_msg(const information& info);
 
 	void round(Request request, const boost::system::error_code &e);
 	void update_hosts(int game_id);
 
-
-
-	void create_logins_board(std::vector<std::pair<boost::asio::ip::tcp::socket *, std::string>> team_sockets,int game_id);
+	void create_logins_board(const std::vector<std::pair<tcp::socket *, std::string>> &team_sockets, int game_id);
 	void create_teams_board(int num_teams, int game_id);
 	void sendDB(int game_id);
+
+	void player_left();
 private:
 	/// Strand to ensure the connection's handlers are not called concurrently.
 	boost::asio::strand<boost::asio::io_context::executor_type> strand_;
 
 	/// Socket for the connection.
-	boost::asio::ip::tcp::socket socket_;
+	tcp::socket socket_;
 
 	std::string user_login_;
 
-	/// The handler used to process the incoming request.
-	Router<std::string(*)(const Request &request)> &requestRouter_;
-
 	/// Buffer for incoming data.
-	std::array<char, 8192> buffer_;
+	boost::asio::streambuf buffer_;
 
 	/// The incoming request.
 	Request request_;
-
-	/// The response to be sent back to the client.
-	Response response_;
 
 	server *Server;
 };
