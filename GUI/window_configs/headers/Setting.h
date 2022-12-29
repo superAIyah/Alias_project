@@ -8,7 +8,7 @@
 
 class Setting : public ISetting{
 public:
-    Setting(QList<QRadioButton *>);
+    explicit Setting(QList<QRadioButton *>);
     std::string collectSetting() override;
 private:
     QList<QRadioButton *> list;

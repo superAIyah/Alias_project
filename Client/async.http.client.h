@@ -19,10 +19,8 @@
 class Client;
 
 #include "../GUI/window_autorise/headers/mainwindow.h"
-//#include "iclientinterface.h"
 #include <QApplication>
 
-#include "response.h"
 #include "request.h"
 
 using boost::asio::ip::tcp;
@@ -37,19 +35,20 @@ private:
 public:
 	Worker(boost::asio::io_context &io_context, QApplication *app) : io_context_(&io_context), app_(app) {}
 
-	~Worker() = default;
+	~Worker() override = default;
 
 public slots:
-
 	void process();
+signals:
+	void finished();
 };
 
 class Client : QObject {
 //	Q_OBJECT
 public:
-	Client(boost::asio::io_context &io_context, const std::string &server_, const std::string &port_, QThread *thread);
+	Client(boost::asio::io_context &io_context, std::string server_, std::string port_, QThread *thread);
 
-	void send_auth(std::string user_login, std::string pwd);
+	void send_auth(const std::string& user_login, const std::string& pwd);
 
 	void send_settings(GameConfig settings, int num_teams, int round_duration_);
 
@@ -62,26 +61,26 @@ public:
 
 	void handle_read(const boost::system::error_code &err);
 
-	void handle_write(const boost::system::error_code &err);
+	void handle_write(bool callback, const boost::system::error_code &err);
 
-	void handle_multiwrite(const boost::system::error_code &e);
-
-	int RoundDuration() { return round_duration; }
+	int RoundDuration() const { return round_duration; }
 	
 	std::string getNick() { return user_login_; }
 
 private:
-	Request parse(std::string req_data);
+	void write(tcp::socket& to_socket, const std::string& response, bool callback);
 
-	std::string BufferData(boost::asio::streambuf *b);
+	void read();
 
-	std::string serialize_auth(std::string user_login, std::string pwd);
+	Request parse(boost::asio::streambuf& req_data);
+
+	static std::string serialize_auth(const std::string& user_login, const std::string& pwd);
 
 	std::string serialize_settings(GameConfig settings);
 
-	std::string serialize_msg(Message msg);
+	std::string serialize_msg(const Message& msg);
 
-	std::string serialize_round();
+	std::string serialize_round() const;
 
 	tcp::resolver resolver_;
 	tcp::socket socket_;
@@ -89,18 +88,17 @@ private:
 	boost::asio::streambuf response_buf_;
 
 	Request request_;
-	Response response_;
 
 	MainWindow *w;
 
 	std::string user_login_;
-	int game_id_;
-	int team_id_;
+	int game_id_{};
+	int team_id_{};
 	std::vector<std::string> team_players;
-	int round_duration;
+	int round_duration{};
 	LeaderBoard leaderboard_;
 	std::string host_login;
-	int num_teams_;
+	int num_teams_{};
 	bool sent_round = false;
 
 	/// The io_context used to perform asynchronous operations.
