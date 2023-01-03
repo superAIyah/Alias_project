@@ -1,5 +1,7 @@
 #include "Leader.h"
 
+#include <utility>
+
 Leader::Leader(std::string name, int points, bool host)
-    : name(name), points(points), host(host)
+    : name(std::move(name)), points(points), host(host)
 {}

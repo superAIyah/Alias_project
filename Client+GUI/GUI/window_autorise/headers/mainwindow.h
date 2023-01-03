@@ -18,10 +18,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-	MainWindow(Client* cl, QWidget *parent = nullptr);
+	explicit MainWindow(Client* cl, QWidget *parent = nullptr);
 //	MainWindow(QWidget *parent = nullptr);
 
-    ~MainWindow();
+    ~MainWindow() override;
 	void NextWindow();
     ConfigWindow *configWindow;
 private slots:

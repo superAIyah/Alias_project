@@ -9,7 +9,7 @@ public:
     virtual void start(int) = 0; // старт таймера
     virtual void stop() = 0; // стоп таймера
     virtual void iteration() = 0; // итерация таймера на delta
-    int time; // текущее время (секунды)
+    int time{}; // текущее время (секунды)
 };
 
 #endif // ITIMER_H

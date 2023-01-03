@@ -1,10 +1,7 @@
 #include "Message.h"
 
-Message::Message(std::string name, bool me, std::string msg)
-    : name(name), me(me), msg(msg)
-{ }
+#include <utility>
 
-void Message::colorIt()
-{
-    return;
-}
+Message::Message(std::string name, bool me, std::string msg)
+    : name(std::move(name)), me(me), msg(std::move(msg))
+{ }

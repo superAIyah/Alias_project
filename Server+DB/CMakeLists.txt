@@ -22,7 +22,7 @@ target_link_directories(async.http.server PUBLIC ${FULL_PATH_TO_MYSQL_CONNECTOR_
 add_compile_options(-lpthread)
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
-target_link_libraries(async.http.server mysqlcppconn8)
+target_link_libraries(async.http.server ${FULL_PATH_TO_MYSQL_CONNECTOR_CPP_DIR}/lib64/libmysqlcppconn8.so)
 
 include_directories(DB)
 add_library(DBConnection DB/DBConnection.cpp)

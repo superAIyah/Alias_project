@@ -6,11 +6,11 @@
 
 class LeaderBoard {
 public:
-    LeaderBoard(std::vector<Leader>);
+    explicit LeaderBoard(std::vector<Leader>);
 	LeaderBoard() = default;
 	void Clear();
     std::vector<Leader> leaders;
-    int size;
+    unsigned int size{};
 };
 
 #endif // LEADERBOARD_H

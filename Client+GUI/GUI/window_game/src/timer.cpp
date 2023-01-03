@@ -2,16 +2,16 @@
 
 Timer::Timer(QLabel* ui_label)
 {
-    timer = new QTimer(0);
+    timer = new QTimer(nullptr);
     label = ui_label;
 }
 
-bool Timer::on()
+bool Timer::on() const
 {
     return turned_on;
 }
 
-bool Timer::off()
+bool Timer::off() const
 {
     return !turned_on;
 }

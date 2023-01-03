@@ -6,8 +6,8 @@
 
 class GameConfig {
 public:
-    GameConfig(std::string sep = "\r\n");
-    void AddSetting(std::string);
+    explicit GameConfig(std::string sep = "\r\n");
+    void AddSetting(const std::string&);
     std::string GetSettings();
     int size;
 private:

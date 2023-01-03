@@ -1,8 +1,10 @@
 #include "LeaderBoard.h"
 
+#include <utility>
+
 LeaderBoard::LeaderBoard(std::vector<Leader> lrs)
 {
-    leaders = lrs;
+    leaders = std::move(lrs);
     size = leaders.size();
 }
 

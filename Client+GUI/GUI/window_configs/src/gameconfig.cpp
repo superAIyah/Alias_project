@@ -1,8 +1,10 @@
 #include "gameconfig.h"
 
-GameConfig::GameConfig(std::string sep /*= '|'*/) : separator(sep), size(0) {}
+#include <utility>
 
-void GameConfig::AddSetting(std::string new_setting) {
+GameConfig::GameConfig(std::string sep /*= '|'*/) : separator(std::move(sep)), size(0) {}
+
+void GameConfig::AddSetting(const std::string& new_setting) {
 //    if (size == 0) {
 //        settings += new_setting;
 //    }
@@ -12,7 +14,7 @@ void GameConfig::AddSetting(std::string new_setting) {
 //    }
     settings += new_setting;
     settings += separator;
-    if (new_setting != "")
+    if (!new_setting.empty())
         size++;
 }
 
