@@ -1,15 +1,16 @@
 #include "Setting.h"
 
+#include <utility>
+
 Setting::Setting(QList<QRadioButton *> radios) {
-    list = radios;
-    return;
+    list = std::move(radios);
 }
 
 std::string Setting::collectSetting() {
-    std::string s = "";
-    for (int i = 0; i < list.size(); i++) {
-        if (list[i]->isChecked())
-            s += list[i]->objectName().toStdString().substr(1);
+    std::string s;
+    for (auto & i : list) {
+        if (i->isChecked())
+            s += i->objectName().toStdString().substr(1);
     }
     return s;
 }

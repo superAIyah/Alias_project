@@ -7,7 +7,7 @@
 
 class GameBuilder {
 public:
-    GameBuilder(std::vector<ISetting *>);
+    explicit GameBuilder(std::vector<ISetting *>);
     GameConfig CollectSettings();
 private:
     std::vector<ISetting *> settings;

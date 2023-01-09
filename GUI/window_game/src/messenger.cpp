@@ -11,10 +11,10 @@ unsigned int Messenger::ShowMessages(const std::vector<Message>& messages)
     std::string color_pref = "<span style='color: #faa823'>"; // to browse own messages
     std::string color_suf = "</span>";
 	std::string between = ": ";
-	for (int i = 0; i < messages.size(); i++) {
-        std::string sms = messages[i].name + between + messages[i].msg;
-        if (messages[i].me) {
-            sms = messages[i].name + between + color_pref + messages[i].msg + color_suf;
+	for (const auto & message : messages) {
+        std::string sms = message.name + between + message.msg;
+        if (message.me) {
+            sms = message.name + between + color_pref + message.msg + color_suf;
         }
         msg_browser->append(sms.c_str());
 	}

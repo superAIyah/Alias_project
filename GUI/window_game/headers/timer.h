@@ -8,15 +8,15 @@
 class Timer : public ITimerController
 {
 public:
-    Timer(QLabel*);
-    bool on();
-    bool off();
-    void start(int start_pos = 60) override;
+    explicit Timer(QLabel*);
+    bool on() const;
+    bool off() const;
+    void start(int start_pos) override;
     void stop() override;
     void iteration() override;
 
     QTimer *timer;
-    int time;
+    int time{};
     int period = 1000; // время через которое нужно посылать сигнал
 private:
     QLabel *label; // место куда будет отображаться время

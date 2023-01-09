@@ -25,14 +25,14 @@ Q_OBJECT
 public:
     explicit GameWindow(Client *cl, ConfigWindow*, QWidget *parent = nullptr);
 
-	~GameWindow();
+	~GameWindow() override;
 
 	Timer *timeController;
 	Board *board;
 	Messenger *msg_browser;
 	ClientInterface *gui;
 
-	ClientInterface *get_client_interface();
+	ClientInterface *get_client_interface() const;
 
 	void UpdateMessages(const Message &new_msg);
 
@@ -57,7 +57,7 @@ private slots:
 
 	void SlotTimerStart();
 
-	void SlotSpoilerWarning();
+	static void SlotSpoilerWarning();
 
 	void SlotUpdateLeaderboard();
 
