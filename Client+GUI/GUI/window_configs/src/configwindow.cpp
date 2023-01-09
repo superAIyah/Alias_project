@@ -25,7 +25,7 @@ ConfigWindow::~ConfigWindow()
 }
 
 void ConfigWindow::MyShow(){
-	if(gameWindow){delete gameWindow;}
+	delete gameWindow;
 	gameWindow = new GameWindow(client_, this);
 	this->show();
 }
@@ -53,7 +53,7 @@ void ConfigWindow::on_findGameButton_clicked()
 
 	// Список со всеми настройками (Полиморфизм)
 	std::vector<ISetting *> configs = {&level, &team_sz, &team_cnt, &round};
-	int settings_cnt = configs.size();
+	unsigned int settings_cnt = configs.size();
 
 	// Создаем класс, собирающий все настройки воедино
 	GameBuilder configs_builder(configs);
@@ -67,7 +67,7 @@ void ConfigWindow::on_findGameButton_clicked()
 
 	QLabel *lbl = ui->labelGIF; // запуск гифки поиска игры
 	std::string gif_path = QDir::currentPath().toStdString() + "/GUI/window_configs/src/loading.gif";
-	QMovie *movie = new QMovie(QString::fromStdString(gif_path));
+	auto *movie = new QMovie(QString::fromStdString(gif_path));
 	lbl->setMovie(movie);
 	lbl->resize(200, 200);
 	lbl->show();
@@ -81,14 +81,14 @@ void ConfigWindow::NextWindow(){
     emit SigNextWindow();
 }
 
-void ConfigWindow::hideGroupBoxes(std::vector<QGroupBox *> mas)
+void ConfigWindow::hideGroupBoxes(const std::vector<QGroupBox *>& mas)
 {
     for (auto box : mas) {
         box->setVisible(false);
     }
 }
 
-void ConfigWindow::showGroupBoxes(std::vector<QGroupBox *> mas)
+void ConfigWindow::showGroupBoxes(const std::vector<QGroupBox *>& mas)
 {
     for (auto box : mas) {
         box->setVisible(true);
@@ -101,7 +101,7 @@ void ConfigWindow::SlotNextWindow(){
 	this->hide();
 }
 
-void ConfigWindow::update_stats(std::string login, int win_cnt, int lose_cnt, int rating)
+void ConfigWindow::update_stats(const std::string& login, unsigned int win_cnt, unsigned int lose_cnt, unsigned int rating)
 {
     QLabel* label_log = ui->labelLogin;
     std::string log_pref = " Логин: ";

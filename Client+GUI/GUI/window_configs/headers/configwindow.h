@@ -21,14 +21,14 @@ class ConfigWindow : public QDialog
 
 public:
     explicit ConfigWindow(Client* cl, QWidget *parent = nullptr);
-    ~ConfigWindow();
+    ~ConfigWindow() override;
 
 	void MyShow();
 
 	void NextWindow();
-    void hideGroupBoxes(std::vector<QGroupBox*>);
-    void showGroupBoxes(std::vector<QGroupBox*>);
-    void update_stats(std::string login, int win_cnt, int lose_cnt, int rating);
+    static void hideGroupBoxes(const std::vector<QGroupBox*>&);
+    static void showGroupBoxes(const std::vector<QGroupBox*>&);
+    void update_stats(const std::string& login, unsigned int win_cnt, unsigned int lose_cnt, unsigned int rating);
 
     GameWindow *gameWindow;
 

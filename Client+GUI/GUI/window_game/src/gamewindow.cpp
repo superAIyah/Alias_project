@@ -1,7 +1,9 @@
 #include "gamewindow.h"
+
+#include <utility>
 #include "ui_gamewindow.h"
 
-GameWindow::GameWindow(Client *cl, ConfigWindow* prev_window, QWidget *parent) :
+GameWindow::GameWindow(Client *cl, ConfigWindow *prev_window, QWidget *parent) :
 		QDialog(parent),
 		ui(new Ui::GameWindow), client_(cl) {
 	ui->setupUi(this);
@@ -9,8 +11,8 @@ GameWindow::GameWindow(Client *cl, ConfigWindow* prev_window, QWidget *parent) :
 	board = new Board(ui->tableBoard); // создание таблички
 	msg_browser = new Messenger(ui->textBrowser, ui->labelWord); // создание мессенджера
 	gui = new ClientInterface(timeController, msg_browser, board);
-    window_config = prev_window;
-    client = cl;
+	window_config = prev_window;
+	client = cl;
 
 	connect(timeController->timer, SIGNAL(timeout()), this, SLOT(SlotTimerIt()));
 	connect(this, SIGNAL(SigTimerStart()), this, SLOT(SlotTimerStart()));
@@ -26,7 +28,7 @@ GameWindow::~GameWindow() {
 	delete ui;
 }
 
-ClientInterface *GameWindow::get_client_interface() {
+ClientInterface *GameWindow::get_client_interface() const {
 	return gui;
 }
 
@@ -54,7 +56,7 @@ void GameWindow::UpdateLeaderboard(const LeaderBoard &lb) {
 }
 
 void GameWindow::UpdateKeyword(std::string new_kw) {
-	keyword = new_kw;
+	keyword = std::move(new_kw);
 	emit SigUpdateKeyword();
 }
 
@@ -63,12 +65,12 @@ void GameWindow::ShowConfig() {
 }
 
 void GameWindow::SlotTimerStart() {
-    // Уведомление в чате об обновлении раунда
-    std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Round</span>";
-    Message msg(new_word, 0, "");
-    gui->messenger->ShowMessages({msg});
+	// Уведомление в чате об обновлении раунда
+	std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Round</span>";
+	Message msg(new_word, false, "");
+	gui->messenger->ShowMessages({msg});
 
-    gui->messenger->UpdateKeyword("Guess the word!");
+	gui->messenger->UpdateKeyword("Guess the word!");
 	timeController->start(client_->RoundDuration());
 }
 
@@ -77,30 +79,30 @@ void GameWindow::SlotSpoilerWarning() {
 }
 
 void GameWindow::SlotUpdateLeaderboard() { // вызывается при отгадывании слова у каждого клиента
-    // напишем в чат всем пользователем, что слово обновилось
-    std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Word</span>";
-    Message msg(new_word, 0, "");
-    gui->messenger->ShowMessages({msg}); // показать в чат всем, что слово обновилось
+	// напишем в чат всем пользователем, что слово обновилось
+	std::string new_word = "<span style=' font-style:italic; text-decoration: underline;'>New Word</span>";
+	Message msg(new_word, false, "");
+	gui->messenger->ShowMessages({msg}); // показать в чат всем, что слово обновилось
 
 	gui->board->UpdateLeaderboard(leaderboard);
-    Board *board_child = (Board*)(gui->board);
-    board_child->colorNick(client->getNick(), QColor(250, 168, 35)); // покраска участника
-    board_child->colorHost(QColor(41, 227, 153)); // покраска хоста
+	auto *board_child = (Board *) (gui->board);
+	board_child->colorNick(client->getNick(), QColor(250, 168, 35)); // покраска участника
+	board_child->colorHost(QColor(41, 227, 153)); // покраска хоста
 }
 
 void GameWindow::SlotUpdateMessages() {
 	std::vector<Message> msgs({last_msg});
 
-    Board *board_child = (Board*)(gui->board); // покраска сообщений хоста
-    std::string color_host_pref = "<span style='color: #29e399'>";
-    std::string color_host_suf = "</span>";
-    std::string host_name = board_child->getHost();
-    for (int i = 0; i < msgs.size(); i++) {
-        Message sms = msgs[i];
-        if (sms.me) continue;
-        if (sms.name == host_name)
-            msgs[i].msg = color_host_pref + sms.msg + color_host_suf;
-    }
+	auto *board_child = (Board *) (gui->board); // покраска сообщений хоста
+	std::string color_host_pref = "<span style='color: #29e399'>";
+	std::string color_host_suf = "</span>";
+	std::string host_name = board_child->getHost();
+	for (auto &msg: msgs) {
+		Message sms = msg;
+		if (sms.me) continue;
+		if (sms.name == host_name)
+			msg.msg = color_host_pref + sms.msg + color_host_suf;
+	}
 
 	gui->messenger->ShowMessages(msgs);
 }
@@ -112,21 +114,24 @@ void GameWindow::SlotUpdateKeyword() {
 void GameWindow::SlotTimerIt() {
 	timeController->iteration(); // итерация таймера
 //	если равен 0 то раунд
-	if (timeController->time == 0) {
+	if (timeController->time <= 0) {
+		timeController->stop();
 		client_->send_round();
 	}
 }
 
 void GameWindow::on_pushButton_clicked() {
 	std::string input_text = ui->lineEdit->text().toStdString();
-	client_->send_msg(input_text);
-    ui->lineEdit->setText("");
+	if (!input_text.empty()) {
+		client_->send_msg(input_text);
+		ui->lineEdit->setText("");
+	}
 }
 
 void GameWindow::SlotShowConfig() {
-    Board* brd = (Board*)gui->board; // чтобы вызвать дочерней метод базового класса
-    std::string winner = brd->getWinner();
-    QMessageBox::about(this, "Победители", winner.c_str());
-    window_config->MyShow();
+	auto *brd = (Board *) gui->board; // чтобы вызвать дочерней метод базового класса
+	std::string winner = brd->getWinner();
+	QMessageBox::about(this, "Победители", winner.c_str());
+	window_config->MyShow();
 //    this->hide();
 }

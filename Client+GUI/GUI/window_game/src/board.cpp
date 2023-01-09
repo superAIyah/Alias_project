@@ -14,11 +14,11 @@ void Board::makeTable(int row, int col) {
 
 unsigned int Board::UpdateLeaderboard(LeaderBoard lb) {
 //    std::cout << lb.size << std::endl;
-    makeTable(lb.size, 3); // корректировка размеров таблицы
+    makeTable(int(lb.size), 3); // корректировка размеров таблицы
 //    std::cout << "OK" << std::endl;
     //std::cout << lb.leaders[0].points;// << " " << lb.leaders[0].points << " " << lb.leaders[0].host << std::endl;
     for (int i = 0; i < lb.size; i++) {
-        QTableWidgetItem *item = new QTableWidgetItem;
+        auto *item = new QTableWidgetItem;
         item->setFlags(item->flags() ^ Qt::ItemIsEditable); // неизменяемость колонок
         Leader leader = lb.leaders[i];
 
@@ -32,7 +32,7 @@ unsigned int Board::UpdateLeaderboard(LeaderBoard lb) {
 
         item = new QTableWidgetItem;
         item->setFlags(item->flags() ^ Qt::ItemIsEditable); // неизменяемость колонок
-        if (leader.host) { // отобраежение хоста
+        if (leader.host) { // отображение хоста
             item->setText("*");
         }
         else {
@@ -43,7 +43,7 @@ unsigned int Board::UpdateLeaderboard(LeaderBoard lb) {
     return 0; // все OK
 }
 
-void Board::colorNick(std::string nick, QColor color)
+void Board::colorNick(const std::string& nick, const QColor& color)
 {
     for (int i = 0; i < table->rowCount(); i++) {
         std::string nick_tmp =  table->item(i, 0)->text().toStdString();
@@ -55,7 +55,7 @@ void Board::colorNick(std::string nick, QColor color)
     }
 }
 
-void Board::colorHost(QColor color)
+void Board::colorHost(const QColor& color)
 {
     for (int i = 0; i < table->rowCount(); i++) {
         std::string host =  table->item(i, 2)->text().toStdString();
@@ -81,7 +81,7 @@ std::string Board::getHost()
 std::string Board::getWinner()
 {
     int max = -1;
-    std::string winners = "";
+    std::string winners;
     for (int i = 0; i < table->rowCount(); i++) {
         int point_tmp = table->item(i, 1)->text().toInt();
         if (point_tmp == max) { // будет несколько победителей
