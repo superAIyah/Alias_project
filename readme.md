@@ -1,7 +1,7 @@
 # VK C++ team project *Alias online*
 
 ### Демонстрация / Demonstration (RU)
-[Видео защита проекта](https://youtu.be/JPDpGDMTbyM) | [Презентация](https://www.canva.com/design/DAFCLTqL1pQ/xDEpUMr6HW45ZAI0yZEFKA/view?utm_content=DAFCLTqL1pQ&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink) | [UML диаграмма](https://drive.google.com/file/d/1Poewjt5NdJ7CTs3k1GxJTFhvo8s4ET1p/view?usp=sharing)
+[Видео защита проекта](https://youtu.be/JPDpGDMTbyM) | [Презентация](https://disk.yandex.ru/d/puPg1l7krULvEw) | [UML диаграмма](https://app.diagrams.net/#G1nmy9VYKzKnCoV41mv8Yp8cVK3E8KiGrm)
 
 ### Идея / Idea
 **Клиент-серверное приложение - игра *Alias online***  
